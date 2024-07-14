@@ -1,11 +1,11 @@
 package com.example.foneproject.service.impl;
 
 import com.example.foneproject.dto.request.JwtAuthRequestDTO;
-import com.example.foneproject.exception.InvalidCredentialsException;
 import com.example.foneproject.service.JwtService;
 import com.example.foneproject.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -22,6 +22,6 @@ public class JwtServiceImpl implements JwtService {
         if (authentication.isAuthenticated()) {
             return jwtUtils.generateToken(jwtAuthRequestDTO.getEmail());
         }
-        throw new InvalidCredentialsException();
+        throw new BadCredentialsException("Invalid Credentials");
     }
 }
