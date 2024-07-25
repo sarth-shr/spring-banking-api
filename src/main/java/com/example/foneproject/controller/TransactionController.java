@@ -22,12 +22,21 @@ public class TransactionController {
     private final TransactionService transactionService;
     private final JsonResponseHandler jsonResponseHandler;
 
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getTransactions(@RequestParam(name = "page", defaultValue = "0") int page) {
+        Page<Transaction> transactions = transactionService.getAll(page);
+        Page<TransactionResponseDTO> transactionResponseDTOPage = transactions.map(transaction -> modelMapper.map(transaction, TransactionResponseDTO.class));
+        PaginationResponseHandler<TransactionResponseDTO> transactionPage = new PaginationResponseHandler<>(transactionResponseDTOPage);
+
+        return jsonResponseHandler.get("Retrieved all transactions", HttpStatus.OK.value(), HttpStatus.OK, transactionPage);
+    }
+
     @GetMapping("/{accId}")
     public ResponseEntity<Map<String, Object>> getTransactionByAccount(@PathVariable("accId") int accId, @RequestParam(name = "page", defaultValue = "0") int page) {
         Page<Transaction> transactions = transactionService.getByAccount(page, accId);
         Page<TransactionResponseDTO> transactionResponseDTOPage = transactions.map(transaction -> modelMapper.map(transaction, TransactionResponseDTO.class));
         PaginationResponseHandler<TransactionResponseDTO> transactionPage = new PaginationResponseHandler<>(transactionResponseDTOPage);
 
-        return jsonResponseHandler.withObjectData("Retrieved all transactions associated with account ID: " + accId, HttpStatus.OK.value(), HttpStatus.OK, transactionPage);
+        return jsonResponseHandler.get("Retrieved all transactions associated with account ID: " + accId, HttpStatus.OK.value(), HttpStatus.OK, transactionPage);
     }
 }

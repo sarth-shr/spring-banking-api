@@ -66,6 +66,14 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public Page<Transaction> getAll(int page) {
+        List<Transaction> transactions = transactionRepository.findAll();
+        Pageable pageable = PageRequest.of(page, 3);
+        return transactionRepository.findAll(pageable);
+
+    }
+
+    @Override
     public Page<Transaction> getByAccount(int page, int accId) {
         List<Transaction> transactions = transactionRepository.findAll();
         if (transactions.isEmpty()) {

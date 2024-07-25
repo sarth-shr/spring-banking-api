@@ -11,5 +11,7 @@ public interface TransactionService {
 
     void saveInterest(Account account, int amount);
 
+    Page<Transaction> getAll(int page);
+
     Page<Transaction> getByAccount(int page, int accId);
 }
