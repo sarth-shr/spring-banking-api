@@ -27,7 +27,7 @@ public class AccountServiceImpl implements AccountService {
     public Account get(int id) {
         Optional<Account> accountOptional = accountRepository.findById(id);
         if (accountOptional.isEmpty()) {
-            throw new ObjectNotFoundException(id);
+            throw new ResourceNotFoundException(id);
         }
         return accountOptional.get();
     }
@@ -35,9 +35,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Page<Account> getAll(int page) {
         List<Account> accounts = accountRepository.findAll();
-        if (accounts.isEmpty()) {
-            throw new EmptyListException();
-        }
         Pageable pageRequest = PageRequest.of(page, 3);
         return accountRepository.findAll(pageRequest);
     }
@@ -47,7 +44,7 @@ public class AccountServiceImpl implements AccountService {
         String email = account.getCustomer().getEmail();
         Optional<Customer> customerOptional = customerRepository.findByEmail(email);
         if (customerOptional.isEmpty()) {
-            throw new ObjectNotFoundException(email);
+            throw new ResourceNotFoundException(email);
         }
         Customer registeredCustomer = customerOptional.get();
         int initialDeposit = registeredCustomer.getInitialDeposit();
@@ -78,7 +75,7 @@ public class AccountServiceImpl implements AccountService {
     public void deposit(int accId, int amount) {
         Optional<Account> accountOptional = accountRepository.findById(accId);
         if (accountOptional.isEmpty()) {
-            throw new ObjectNotFoundException(accId);
+            throw new ResourceNotFoundException(accId);
         }
         Account account = accountOptional.get();
         int currentBalance = account.getBalance();
@@ -121,7 +118,7 @@ public class AccountServiceImpl implements AccountService {
     public void delete(int id) {
         Optional<Account> accountOptional = accountRepository.findById(id);
         if (accountOptional.isEmpty()) {
-            throw new ObjectNotFoundException(id);
+            throw new ResourceNotFoundException(id);
         }
 
         Account account = accountOptional.get();

@@ -30,7 +30,7 @@ public class AccountController {
     public ResponseEntity<Map<String, Object>> getAccount(@PathVariable("accId") int id) {
         Account account = accountService.get(id);
         AccountResponseDTO accountResponseDTO = modelMapper.map(account, AccountResponseDTO.class);
-        return jsonResponseHandler.withObjectData("Retrieved account with ID: " + id, HttpStatus.OK.value(), HttpStatus.OK, accountResponseDTO);
+        return jsonResponseHandler.get("Retrieved account with ID: " + id, HttpStatus.OK.value(), HttpStatus.OK, accountResponseDTO);
     }
 
     @GetMapping
@@ -39,7 +39,7 @@ public class AccountController {
         Page<AccountResponseDTO> accountResponseDTOPage = accounts.map(account -> modelMapper.map(account, AccountResponseDTO.class));
         PaginationResponseHandler<AccountResponseDTO> accountPage = new PaginationResponseHandler<>(accountResponseDTOPage);
 
-        return jsonResponseHandler.withObjectData("Retrieved all accounts", HttpStatus.OK.value(), HttpStatus.OK, accountPage);
+        return jsonResponseHandler.get("Retrieved all accounts", HttpStatus.OK.value(), HttpStatus.OK, accountPage);
     }
 
     @PostMapping
@@ -47,7 +47,7 @@ public class AccountController {
         Account account = modelMapper.map(accountRequestDTO, Account.class);
         accountService.open(account);
 
-        return jsonResponseHandler.withoutObjectData("Account successfully opened", HttpStatus.CREATED.value(), HttpStatus.CREATED);
+        return jsonResponseHandler.get("Account successfully opened", HttpStatus.CREATED.value(), HttpStatus.CREATED);
     }
 
     @PostMapping("/deposit/{accId}")
@@ -60,7 +60,7 @@ public class AccountController {
                 "Amount of " + amount + " has been deposited into your account with ID: " + accId
         );
 
-        return jsonResponseHandler.withoutObjectData("Amount: " + amount + " deposited to account with ID: " + accId, HttpStatus.OK.value(), HttpStatus.OK);
+        return jsonResponseHandler.get("Amount: " + amount + " deposited to account with ID: " + accId, HttpStatus.OK.value(), HttpStatus.OK);
     }
 
     @PostMapping("/transfer")
@@ -79,13 +79,13 @@ public class AccountController {
                 "Amount of " + amount + " has been transferred into your account with ID: " + toId + " from account with ID: " + fromId
         );
 
-        return jsonResponseHandler.withoutObjectData("Amount: " + amount + " transferred from account with ID: " + fromId + " to account with ID: " + toId, HttpStatus.OK.value(), HttpStatus.OK);
+        return jsonResponseHandler.get("Amount: " + amount + " transferred from account with ID: " + fromId + " to account with ID: " + toId, HttpStatus.OK.value(), HttpStatus.OK);
     }
 
     @DeleteMapping("delete/{accId}")
     public ResponseEntity<Map<String, Object>> deleteAccount(@PathVariable("accId") int id) {
         accountService.delete(id);
 
-        return jsonResponseHandler.withoutObjectData("Account ID: " + id + " deleted successfully", HttpStatus.OK.value(), HttpStatus.OK);
+        return jsonResponseHandler.get("Account ID: " + id + " deleted successfully", HttpStatus.OK.value(), HttpStatus.OK);
     }
 }

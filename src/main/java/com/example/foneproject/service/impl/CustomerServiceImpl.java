@@ -1,9 +1,8 @@
 package com.example.foneproject.service.impl;
 
 import com.example.foneproject.entity.Customer;
-import com.example.foneproject.exception.EmptyListException;
 import com.example.foneproject.exception.InvalidEmailException;
-import com.example.foneproject.exception.ObjectNotFoundException;
+import com.example.foneproject.exception.ResourceNotFoundException;
 import com.example.foneproject.repository.CustomerRepository;
 import com.example.foneproject.service.CustomerService;
 import com.example.foneproject.service.UserCredentialsService;
@@ -41,7 +40,7 @@ public class CustomerServiceImpl implements CustomerService {
     public Customer get(String email) {
         Optional<Customer> customerOptional = customerRepository.findByEmail(email);
         if (customerOptional.isEmpty()) {
-            throw new ObjectNotFoundException(email);
+            throw new ResourceNotFoundException(email);
         }
         return customerOptional.get();
     }
@@ -49,9 +48,6 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Page<Customer> getAll(int page) {
         List<Customer> customers = customerRepository.findAll();
-        if (customers.isEmpty()) {
-            throw new EmptyListException();
-        }
         Pageable pageable = PageRequest.of(page, 3);
         return customerRepository.findAll(pageable);
     }
@@ -60,7 +56,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Transactional
     public void update(String email, Customer customer) {
         if (!customerRepository.existsByEmail(email)) {
-            throw new ObjectNotFoundException(email);
+            throw new ResourceNotFoundException(email);
         }
         customer.setPassword(passwordEncoder.encode(customer.getPassword()));
         customerRepository.updateByEmail(customer.getFirstName(), customer.getLastName(), customer.getPassword(), email);

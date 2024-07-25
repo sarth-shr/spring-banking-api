@@ -19,17 +19,14 @@ import java.util.Map;
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
-    @ExceptionHandler({ObjectNotFoundException.class, EmptyListException.class})
+    @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFoundException(RuntimeException e) {
         Map<String, Object> responseMap = new LinkedHashMap<>();
         responseMap.put("timestamp", new Date());
         responseMap.put("code", HttpStatus.NOT_FOUND.value());
         responseMap.put("status", HttpStatus.NOT_FOUND);
+        responseMap.put("error", e.getMessage());
 
-        Map<String, Object> errorMap = new LinkedHashMap<>();
-        errorMap.put("message", e.getMessage());
-
-        responseMap.put("errors", errorMap);
         return new ResponseEntity<>(responseMap, HttpStatus.NOT_FOUND);
     }
 
@@ -43,43 +40,34 @@ public class GlobalExceptionHandler {
             UnsupportedAccTypeException.class,
     })
     public ResponseEntity<Map<String, Object>> handleBadRequestException(RuntimeException e) {
-        Map<String, Object> responseMap = new LinkedHashMap<>();
-        responseMap.put("timestamp", new Date());
-        responseMap.put("code", HttpStatus.BAD_REQUEST.value());
-        responseMap.put("status", HttpStatus.BAD_REQUEST);
-
         Map<String, Object> errorMap = new LinkedHashMap<>();
-        errorMap.put("message", e.getMessage());
+        errorMap.put("timestamp", new Date());
+        errorMap.put("code", HttpStatus.BAD_REQUEST.value());
+        errorMap.put("status", HttpStatus.BAD_REQUEST);
+        errorMap.put("error", e.getMessage());
 
-        responseMap.put("errors", errorMap);
-        return new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class})
     public ResponseEntity<Map<String, Object>> handleUnauthorizedException(RuntimeException e) {
-        Map<String, Object> responseMap = new LinkedHashMap<>();
-        responseMap.put("timestamp", new Date());
-        responseMap.put("code", HttpStatus.UNAUTHORIZED.value());
-        responseMap.put("status", HttpStatus.UNAUTHORIZED);
-
         Map<String, Object> errorMap = new LinkedHashMap<>();
-        errorMap.put("message", e.getMessage());
+        errorMap.put("timestamp", new Date());
+        errorMap.put("code", HttpStatus.UNAUTHORIZED.value());
+        errorMap.put("status", HttpStatus.UNAUTHORIZED);
+        errorMap.put("error", e.getMessage());
 
-        responseMap.put("errors", errorMap);
-        return new ResponseEntity<>(responseMap, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(errorMap, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler({SignatureException.class, ExpiredJwtException.class, AccessDeniedException.class})
     public ResponseEntity<Map<String, Object>> handleForbiddenException(RuntimeException e) {
-        Map<String, Object> responseMap = new LinkedHashMap<>();
-        responseMap.put("timestamp", new Date());
-        responseMap.put("code", HttpStatus.FORBIDDEN.value());
-        responseMap.put("status", HttpStatus.FORBIDDEN);
-
         Map<String, Object> errorMap = new LinkedHashMap<>();
-        errorMap.put("message", e.getMessage());
+        errorMap.put("timestamp", new Date());
+        errorMap.put("code", HttpStatus.FORBIDDEN.value());
+        errorMap.put("status", HttpStatus.FORBIDDEN);
+        errorMap.put("error", e.getMessage());
 
-        responseMap.put("errors", errorMap);
-        return new ResponseEntity<>(responseMap, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(errorMap, HttpStatus.FORBIDDEN);
     }
 }

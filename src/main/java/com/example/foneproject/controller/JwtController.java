@@ -24,7 +24,7 @@ public class JwtController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> getToken(@Valid @RequestBody JwtAuthRequestDTO jwtAuthRequestDTO) {
         String token = jwtService.get(jwtAuthRequestDTO);
-        return jsonResponseHandler.withHeaders("Jwt Generated", HttpStatus.OK.value(), HttpStatus.OK, token);
+        return jsonResponseHandler.get("Jwt Generated", HttpStatus.OK.value(), HttpStatus.OK, token);
 
     }
 }

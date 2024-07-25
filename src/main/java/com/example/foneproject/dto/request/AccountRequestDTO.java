@@ -16,6 +16,7 @@ public class AccountRequestDTO {
     private Integer balance;
 
     @Valid
+    @NotNull(message = "Required field")
     private AccountCustomerRequestDTO customer;
 
 }

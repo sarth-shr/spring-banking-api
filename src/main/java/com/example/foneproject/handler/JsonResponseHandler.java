@@ -13,7 +13,7 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class JsonResponseHandler {
-    public ResponseEntity<Map<String, Object>> withObjectData(String message, int statusCode, HttpStatus httpStatus, Object response) {
+    public ResponseEntity<Map<String, Object>> get(String message, int statusCode, HttpStatus httpStatus, Object response) {
         Map<String, Object> responseMap = new LinkedHashMap<>();
         responseMap.put("timestamp", new Date());
         responseMap.put("code", statusCode);
@@ -24,7 +24,7 @@ public class JsonResponseHandler {
         return new ResponseEntity<>(responseMap, httpStatus);
     }
 
-    public ResponseEntity<Map<String, Object>> withoutObjectData(String message, int statusCode, HttpStatus httpStatus) {
+    public ResponseEntity<Map<String, Object>> get(String message, int statusCode, HttpStatus httpStatus) {
         Map<String, Object> responseMap = new LinkedHashMap<>();
         responseMap.put("timestamp", new Date());
         responseMap.put("code", statusCode);
@@ -34,7 +34,7 @@ public class JsonResponseHandler {
         return new ResponseEntity<>(responseMap, httpStatus);
     }
 
-    public ResponseEntity<Map<String, Object>> withHeaders(String message, int statusCode, HttpStatus httpStatus, String token) {
+    public ResponseEntity<Map<String, Object>> get(String message, int statusCode, HttpStatus httpStatus, String token) {
         Map<String, Object> responseMap = new LinkedHashMap<>();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", token);

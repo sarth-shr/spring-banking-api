@@ -2,7 +2,7 @@ package com.example.foneproject.service.impl;
 
 import com.example.foneproject.entity.Customer;
 import com.example.foneproject.entity.UserCredentials;
-import com.example.foneproject.exception.ObjectNotFoundException;
+import com.example.foneproject.exception.ResourceNotFoundException;
 import com.example.foneproject.repository.UserCredentialsRepository;
 import com.example.foneproject.service.UserCredentialsService;
 import jakarta.annotation.PostConstruct;
@@ -53,7 +53,7 @@ public class UserCredentialsServiceImpl implements UserCredentialsService {
     @Transactional
     public void disableUser(String email) {
         if (!userCredentialsRepository.existsByEmail(email)) {
-            throw new ObjectNotFoundException(email);
+            throw new ResourceNotFoundException(email);
         }
         userCredentialsRepository.disableByEmail(email);
     }
@@ -62,7 +62,7 @@ public class UserCredentialsServiceImpl implements UserCredentialsService {
     @Transactional
     public void enableUser(String email) {
         if (!userCredentialsRepository.existsByEmail(email)) {
-            throw new ObjectNotFoundException(email);
+            throw new ResourceNotFoundException(email);
         }
         userCredentialsRepository.enableByEmail(email);
     }
@@ -71,7 +71,7 @@ public class UserCredentialsServiceImpl implements UserCredentialsService {
     @Transactional
     public void assignRole(String authorities, String email) {
         if (!userCredentialsRepository.existsByEmail(email)) {
-            throw new ObjectNotFoundException(email);
+            throw new ResourceNotFoundException(email);
         }
         userCredentialsRepository.assignRoleByEmail(authorities, email);
     }

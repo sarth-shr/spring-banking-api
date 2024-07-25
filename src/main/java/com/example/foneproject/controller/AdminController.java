@@ -23,19 +23,19 @@ public class AdminController {
     @PostMapping("/disable")
     public ResponseEntity<Map<String, Object>> disableUser(@RequestParam("email") String email) {
         userCredentialsService.disableUser(email);
-        return jsonResponseHandler.withoutObjectData("User with email: " + email + " disabled", HttpStatus.OK.value(), HttpStatus.OK);
+        return jsonResponseHandler.get("User with email: " + email + " disabled", HttpStatus.OK.value(), HttpStatus.OK);
     }
 
     @PostMapping("/enable")
     public ResponseEntity<Map<String, Object>> enableUser(@RequestParam("email") String email) {
         userCredentialsService.enableUser(email);
-        return jsonResponseHandler.withoutObjectData("User with email: " + email + " enabled", HttpStatus.OK.value(), HttpStatus.OK);
+        return jsonResponseHandler.get("User with email: " + email + " enabled", HttpStatus.OK.value(), HttpStatus.OK);
     }
 
     @PostMapping("/authorities")
     public ResponseEntity<Map<String, Object>> assignRoles(@RequestParam("email") String email, @RequestBody AuthoritiesRequestDTO authoritiesRequestDTO) {
         UserCredentials userCredentials = modelMapper.map(authoritiesRequestDTO, UserCredentials.class);
         userCredentialsService.assignRole(authoritiesRequestDTO.getAuthorities(), email);
-        return jsonResponseHandler.withoutObjectData("Updated roles for user with email: " + email, HttpStatus.OK.value(), HttpStatus.OK);
+        return jsonResponseHandler.get("Updated roles for user with email: " + email, HttpStatus.OK.value(), HttpStatus.OK);
     }
 }

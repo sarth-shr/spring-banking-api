@@ -30,7 +30,7 @@ public class CustomerController {
         Customer customer = modelMapper.map(customerRequestDTO, Customer.class);
         customerService.save(customer);
 
-        return jsonResponseHandler.withoutObjectData("Email registered successfully", HttpStatus.CREATED.value(), HttpStatus.CREATED);
+        return jsonResponseHandler.get("Email registered successfully", HttpStatus.CREATED.value(), HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -39,7 +39,7 @@ public class CustomerController {
         Page<CustomerResponseDTO> customerResponseDTOPage = customers.map(customer -> modelMapper.map(customer, CustomerResponseDTO.class));
         PaginationResponseHandler<CustomerResponseDTO> customerPage = new PaginationResponseHandler<>(customerResponseDTOPage);
 
-        return jsonResponseHandler.withObjectData("Retrieved customers list", HttpStatus.OK.value(), HttpStatus.OK, customerPage);
+        return jsonResponseHandler.get("Retrieved customers list", HttpStatus.OK.value(), HttpStatus.OK, customerPage);
     }
 
     @GetMapping("/get")
@@ -47,7 +47,7 @@ public class CustomerController {
         Customer customer = customerService.get(email);
         CustomerResponseDTO customerResponseDTO = modelMapper.map(customer, CustomerResponseDTO.class);
 
-        return jsonResponseHandler.withObjectData("Retrieved customer with email: " + email, HttpStatus.OK.value(), HttpStatus.OK, customerResponseDTO);
+        return jsonResponseHandler.get("Retrieved customer with email: " + email, HttpStatus.OK.value(), HttpStatus.OK, customerResponseDTO);
     }
 
     @PutMapping("/update")
@@ -55,6 +55,6 @@ public class CustomerController {
         Customer customer = modelMapper.map(customerUpdateRequestDTO, Customer.class);
         customerService.update(email, customer);
 
-        return jsonResponseHandler.withoutObjectData("Updated user with email: " + email, HttpStatus.OK.value(), HttpStatus.OK);
+        return jsonResponseHandler.get("Updated user with email: " + email, HttpStatus.OK.value(), HttpStatus.OK);
     }
 }
