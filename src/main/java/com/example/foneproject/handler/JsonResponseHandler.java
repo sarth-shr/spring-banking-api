@@ -37,7 +37,8 @@ public class JsonResponseHandler {
     public ResponseEntity<Map<String, Object>> get(String message, int statusCode, HttpStatus httpStatus, String token) {
         Map<String, Object> responseMap = new LinkedHashMap<>();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", token);
+        headers.add("Authorization", token);
+        headers.add("Access-Control-Expose-Headers", "Authorization");
         responseMap.put("timestamp", new Date());
         responseMap.put("code", statusCode);
         responseMap.put("status", httpStatus);
