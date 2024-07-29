@@ -54,13 +54,24 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public void update(String email, Customer customer) {
+    public void updatePersonal(String email, Customer customer) {
         if (!customerRepository.existsByEmail(email)) {
             throw new ResourceNotFoundException(email);
         }
-        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
-        customerRepository.updateByEmail(customer.getFirstName(), customer.getLastName(), customer.getPassword(), email);
+        customerRepository.updatePersonalDetails(customer.getFirstName(), customer.getLastName(), email);
+    }
 
-        userCredentialsService.update(email, customer);
+    @Override
+    @Transactional
+    public void updateSecurity(String email, Customer customer) {
+        if (!customerRepository.existsByEmail(email)) {
+            throw new ResourceNotFoundException(email);
+        }
+        if (!customerRepository.existsByEmail(customer.getEmail())) {
+            customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+            customerRepository.updateSecurityDetails(customer.getEmail(), customer.getPassword(), email);
+            userCredentialsService.update(email, customer);
+        }
+        throw new InvalidEmailException(customer.getEmail());
     }
 }

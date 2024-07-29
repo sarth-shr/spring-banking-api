@@ -46,7 +46,7 @@ public class UserCredentialsServiceImpl implements UserCredentialsService {
     @Transactional
     public void update(String email, Customer customer) {
         UserCredentials userCredentials = modelMapper.map(customer, UserCredentials.class);
-        userCredentialsRepository.updateByEmail(email, userCredentials.getPassword(), "CUSTOMER");
+        userCredentialsRepository.update(userCredentials.getEmail(), userCredentials.getPassword(), email);
     }
 
     @Override

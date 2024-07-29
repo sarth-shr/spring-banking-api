@@ -10,5 +10,7 @@ public interface CustomerService {
 
     Page<Customer> getAll(int page);
 
-    void update(String email, Customer customer);
+    void updatePersonal(String email, Customer customer);
+
+    void updateSecurity(String email, Customer customer);
 }

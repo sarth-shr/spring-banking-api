@@ -13,18 +13,18 @@ public interface UserCredentialsRepository extends JpaRepository<UserCredentials
     Optional<UserCredentials> findByEmail(String email);
 
     @Modifying
-    @Query("update UserCredentials uc set uc.email=?1, uc.password=?2, uc.authorities=?3 where uc.email=?1")
-    void updateByEmail(String email, String password, String authorities);
+    @Query("update UserCredentials uc set uc.email= ?1, uc.password= ?2 where uc.email= ?3")
+    void update(String newEmail, String password, String currentEmail);
 
     @Modifying
-    @Query("update UserCredentials uc set uc.enabled=false where uc.email=?1")
+    @Query("update UserCredentials uc set uc.enabled= false where uc.email= ?1")
     void disableByEmail(String email);
 
     @Modifying
-    @Query("update UserCredentials uc set uc.enabled=true where uc.email=?1")
+    @Query("update UserCredentials uc set uc.enabled= true where uc.email= ?1")
     void enableByEmail(String email);
 
     @Modifying
-    @Query("update UserCredentials uc set uc.authorities=?1 where uc.email=?2")
+    @Query("update UserCredentials uc set uc.authorities= ?1 where uc.email= ?2")
     void assignRoleByEmail(String authorities, String email);
 }

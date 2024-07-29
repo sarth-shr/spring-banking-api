@@ -13,6 +13,10 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
     Optional<Customer> findByEmail(String email);
 
     @Modifying
-    @Query("update Customer c set c.firstName= ?1, c.lastName= ?2, c.password= ?3 where c.email= ?4")
-    void updateByEmail(String firstName, String lastName, String password, String email);
+    @Query("update Customer c set c.firstName= ?1, c.lastName= ?2 where c.email= ?3")
+    void updatePersonalDetails(String firstName, String lastName, String email);
+
+    @Modifying
+    @Query("update Customer c set c.email= ?1, c.password= ?2 where c.email = ?3")
+    void updateSecurityDetails(String newEmail, String password, String currentEmail);
 }

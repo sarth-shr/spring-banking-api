@@ -2,6 +2,7 @@ package com.example.foneproject.controller;
 
 import com.example.foneproject.dto.request.CustomerInfoReqDTO;
 import com.example.foneproject.dto.request.CustomerReqDTO;
+import com.example.foneproject.dto.request.CustomerSecReqDTO;
 import com.example.foneproject.dto.response.CustomerResDTO;
 import com.example.foneproject.entity.Customer;
 import com.example.foneproject.handler.JsonResponseHandler;
@@ -50,11 +51,19 @@ public class CustomerController {
         return jsonResponseHandler.get("Retrieved customer with email: " + email, HttpStatus.OK.value(), HttpStatus.OK, customerResDTO);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update/personal")
     public ResponseEntity<Map<String, Object>> updateUserInformation(@RequestParam("email") String email, @Valid @RequestBody CustomerInfoReqDTO customerInfoReqDTO) {
         Customer customer = modelMapper.map(customerInfoReqDTO, Customer.class);
         customerService.updatePersonal(email, customer);
 
-        return jsonResponseHandler.get("Updated user with email: " + email, HttpStatus.OK.value(), HttpStatus.OK);
+        return jsonResponseHandler.get("Updated personal details of email: " + email, HttpStatus.OK.value(), HttpStatus.OK);
+    }
+
+    @PutMapping("/update/security")
+    public ResponseEntity<Map<String, Object>> updateUserSecurity(@RequestParam("email") String email, @Valid @RequestBody CustomerSecReqDTO customerSecReqDTO) {
+        Customer customer = modelMapper.map(customerSecReqDTO, Customer.class);
+        customerService.updateSecurity(email, customer);
+
+        return jsonResponseHandler.get("Security details updated successfully", HttpStatus.OK.value(), HttpStatus.OK);
     }
 }
