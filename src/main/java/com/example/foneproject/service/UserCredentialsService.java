@@ -5,7 +5,9 @@ import com.example.foneproject.entity.Customer;
 public interface UserCredentialsService {
     void save(Customer customer);
 
-    void update(String email, Customer customer);
+    void updateEmail(String email, Customer customer);
+
+    void updatePassword(String email, Customer customer);
 
     void loadAdmin();
 

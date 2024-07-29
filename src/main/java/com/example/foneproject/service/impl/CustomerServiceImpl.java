@@ -1,6 +1,7 @@
 package com.example.foneproject.service.impl;
 
 import com.example.foneproject.entity.Customer;
+import com.example.foneproject.exception.InvalidCredentialsException;
 import com.example.foneproject.exception.InvalidEmailException;
 import com.example.foneproject.exception.ResourceNotFoundException;
 import com.example.foneproject.repository.CustomerRepository;
@@ -63,15 +64,30 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public void updateSecurity(String email, Customer customer) {
+    public void updateEmail(String email, Customer customer) {
         if (!customerRepository.existsByEmail(email)) {
             throw new ResourceNotFoundException(email);
         }
-        if (!customerRepository.existsByEmail(customer.getEmail())) {
-            customer.setPassword(passwordEncoder.encode(customer.getPassword()));
-            customerRepository.updateSecurityDetails(customer.getEmail(), customer.getPassword(), email);
-            userCredentialsService.update(email, customer);
+        if (customerRepository.existsByEmail(customer.getEmail())) {
+            throw new InvalidEmailException(customer.getEmail());
         }
-        throw new InvalidEmailException(customer.getEmail());
+        customerRepository.updateEmail(customer.getEmail(), email);
+        userCredentialsService.updateEmail(email, customer);
+    }
+
+    @Override
+    @Transactional
+    public void updatePassword(String currentPassword, String email, Customer customer) {
+        Optional<Customer> customerOptional = customerRepository.findByEmail(email);
+        if (customerOptional.isEmpty()) {
+            throw new ResourceNotFoundException(email);
+        }
+        String hashedPassword = customerOptional.get().getPassword();
+        if (!passwordEncoder.matches(currentPassword, hashedPassword)) {
+            throw new InvalidCredentialsException();
+        }
+
+        customerRepository.updatePassword(passwordEncoder.encode(customer.getPassword()), email);
+        userCredentialsService.updatePassword(email, customer);
     }
 }

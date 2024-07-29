@@ -1,8 +1,9 @@
 package com.example.foneproject.controller;
 
+import com.example.foneproject.dto.request.CustomerEmailReqDTO;
 import com.example.foneproject.dto.request.CustomerInfoReqDTO;
+import com.example.foneproject.dto.request.CustomerPasswordReqDTO;
 import com.example.foneproject.dto.request.CustomerReqDTO;
-import com.example.foneproject.dto.request.CustomerSecReqDTO;
 import com.example.foneproject.dto.response.CustomerResDTO;
 import com.example.foneproject.entity.Customer;
 import com.example.foneproject.handler.JsonResponseHandler;
@@ -59,11 +60,19 @@ public class CustomerController {
         return jsonResponseHandler.get("Updated personal details of email: " + email, HttpStatus.OK.value(), HttpStatus.OK);
     }
 
-    @PutMapping("/update/security")
-    public ResponseEntity<Map<String, Object>> updateUserSecurity(@RequestParam("email") String email, @Valid @RequestBody CustomerSecReqDTO customerSecReqDTO) {
-        Customer customer = modelMapper.map(customerSecReqDTO, Customer.class);
-        customerService.updateSecurity(email, customer);
+    @PutMapping("/update/email")
+    public ResponseEntity<Map<String, Object>> updateUserEmail(@RequestParam("email") String email, @Valid @RequestBody CustomerEmailReqDTO customerEmailReqDTO) {
+        Customer customer = modelMapper.map(customerEmailReqDTO, Customer.class);
+        customerService.updateEmail(email, customer);
 
-        return jsonResponseHandler.get("Security details updated successfully", HttpStatus.OK.value(), HttpStatus.OK);
+        return jsonResponseHandler.get("Email changed successfully", HttpStatus.OK.value(), HttpStatus.OK);
+    }
+
+    @PutMapping("update/password")
+    public ResponseEntity<Map<String, Object>> updateUserPassword(@RequestParam("email") String email, @Valid @RequestBody CustomerPasswordReqDTO customerPasswordReqDTO) {
+        Customer customer = modelMapper.map(customerPasswordReqDTO, Customer.class);
+        customerService.updatePassword(customerPasswordReqDTO.getCurrentPassword(), email, customer);
+
+        return jsonResponseHandler.get("Password changed successfully", HttpStatus.OK.value(), HttpStatus.OK);
     }
 }

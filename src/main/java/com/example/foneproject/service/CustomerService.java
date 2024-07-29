@@ -12,5 +12,7 @@ public interface CustomerService {
 
     void updatePersonal(String email, Customer customer);
 
-    void updateSecurity(String email, Customer customer);
+    void updateEmail(String email, Customer customer);
+
+    void updatePassword(String currentPassword, String email, Customer customer);
 }
