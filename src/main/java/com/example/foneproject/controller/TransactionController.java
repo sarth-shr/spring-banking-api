@@ -1,6 +1,6 @@
 package com.example.foneproject.controller;
 
-import com.example.foneproject.dto.response.TransactionResponseDTO;
+import com.example.foneproject.dto.response.TransactionResDTO;
 import com.example.foneproject.entity.Transaction;
 import com.example.foneproject.handler.JsonResponseHandler;
 import com.example.foneproject.handler.PaginationResponseHandler;
@@ -25,8 +25,8 @@ public class TransactionController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> getTransactions(@RequestParam(name = "page", defaultValue = "0") int page) {
         Page<Transaction> transactions = transactionService.getAll(page);
-        Page<TransactionResponseDTO> transactionResponseDTOPage = transactions.map(transaction -> modelMapper.map(transaction, TransactionResponseDTO.class));
-        PaginationResponseHandler<TransactionResponseDTO> transactionPage = new PaginationResponseHandler<>(transactionResponseDTOPage);
+        Page<TransactionResDTO> transactionResDTOPage = transactions.map(transaction -> modelMapper.map(transaction, TransactionResDTO.class));
+        PaginationResponseHandler<TransactionResDTO> transactionPage = new PaginationResponseHandler<>(transactionResDTOPage);
 
         return jsonResponseHandler.get("Retrieved all transactions", HttpStatus.OK.value(), HttpStatus.OK, transactionPage);
     }
@@ -34,8 +34,8 @@ public class TransactionController {
     @GetMapping("/{accId}")
     public ResponseEntity<Map<String, Object>> getTransactionByAccount(@PathVariable("accId") int accId, @RequestParam(name = "page", defaultValue = "0") int page) {
         Page<Transaction> transactions = transactionService.getByAccount(page, accId);
-        Page<TransactionResponseDTO> transactionResponseDTOPage = transactions.map(transaction -> modelMapper.map(transaction, TransactionResponseDTO.class));
-        PaginationResponseHandler<TransactionResponseDTO> transactionPage = new PaginationResponseHandler<>(transactionResponseDTOPage);
+        Page<TransactionResDTO> transactionResDTOPage = transactions.map(transaction -> modelMapper.map(transaction, TransactionResDTO.class));
+        PaginationResponseHandler<TransactionResDTO> transactionPage = new PaginationResponseHandler<>(transactionResDTOPage);
 
         return jsonResponseHandler.get("Retrieved all transactions associated with account ID: " + accId, HttpStatus.OK.value(), HttpStatus.OK, transactionPage);
     }

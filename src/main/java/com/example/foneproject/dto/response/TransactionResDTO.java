@@ -9,7 +9,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-public class TransactionResponseDTO {
+public class TransactionResDTO {
     private int id;
     private Date date;
     private String type;

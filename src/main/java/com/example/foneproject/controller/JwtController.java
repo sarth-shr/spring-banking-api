@@ -1,6 +1,6 @@
 package com.example.foneproject.controller;
 
-import com.example.foneproject.dto.request.JwtAuthRequestDTO;
+import com.example.foneproject.dto.request.JwtAuthReqDTO;
 import com.example.foneproject.handler.JsonResponseHandler;
 import com.example.foneproject.service.JwtService;
 import jakarta.validation.Valid;
@@ -22,8 +22,8 @@ public class JwtController {
     private final JsonResponseHandler jsonResponseHandler;
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> getToken(@Valid @RequestBody JwtAuthRequestDTO jwtAuthRequestDTO) {
-        String token = jwtService.get(jwtAuthRequestDTO);
+    public ResponseEntity<Map<String, Object>> getToken(@Valid @RequestBody JwtAuthReqDTO jwtAuthReqDTO) {
+        String token = jwtService.get(jwtAuthReqDTO);
         return jsonResponseHandler.get("Jwt Generated", HttpStatus.OK.value(), HttpStatus.OK, token);
 
     }

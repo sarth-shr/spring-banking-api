@@ -1,7 +1,7 @@
 package com.example.foneproject.controller;
 
-import com.example.foneproject.dto.request.AccountRequestDTO;
-import com.example.foneproject.dto.response.AccountResponseDTO;
+import com.example.foneproject.dto.request.AccountReqDTO;
+import com.example.foneproject.dto.response.AccountResDTO;
 import com.example.foneproject.entity.Account;
 import com.example.foneproject.handler.JsonResponseHandler;
 import com.example.foneproject.handler.PaginationResponseHandler;
@@ -29,22 +29,22 @@ public class AccountController {
     @GetMapping("/{accId}")
     public ResponseEntity<Map<String, Object>> getAccount(@PathVariable("accId") int id) {
         Account account = accountService.get(id);
-        AccountResponseDTO accountResponseDTO = modelMapper.map(account, AccountResponseDTO.class);
-        return jsonResponseHandler.get("Retrieved account with ID: " + id, HttpStatus.OK.value(), HttpStatus.OK, accountResponseDTO);
+        AccountResDTO accountResDTO = modelMapper.map(account, AccountResDTO.class);
+        return jsonResponseHandler.get("Retrieved account with ID: " + id, HttpStatus.OK.value(), HttpStatus.OK, accountResDTO);
     }
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAccounts(@RequestParam(name = "page", defaultValue = "0") int page) {
         Page<Account> accounts = accountService.getAll(page);
-        Page<AccountResponseDTO> accountResponseDTOPage = accounts.map(account -> modelMapper.map(account, AccountResponseDTO.class));
-        PaginationResponseHandler<AccountResponseDTO> accountPage = new PaginationResponseHandler<>(accountResponseDTOPage);
+        Page<AccountResDTO> accountResDTOPage = accounts.map(account -> modelMapper.map(account, AccountResDTO.class));
+        PaginationResponseHandler<AccountResDTO> accountPage = new PaginationResponseHandler<>(accountResDTOPage);
 
         return jsonResponseHandler.get("Retrieved all accounts", HttpStatus.OK.value(), HttpStatus.OK, accountPage);
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> openAccount(@Valid @RequestBody AccountRequestDTO accountRequestDTO) {
-        Account account = modelMapper.map(accountRequestDTO, Account.class);
+    public ResponseEntity<Map<String, Object>> openAccount(@Valid @RequestBody AccountReqDTO accountReqDTO) {
+        Account account = modelMapper.map(accountReqDTO, Account.class);
         accountService.open(account);
 
         return jsonResponseHandler.get("Account successfully opened", HttpStatus.CREATED.value(), HttpStatus.CREATED);

@@ -1,6 +1,6 @@
 package com.example.foneproject.controller;
 
-import com.example.foneproject.dto.request.AuthoritiesRequestDTO;
+import com.example.foneproject.dto.request.AuthoritiesReqDTO;
 import com.example.foneproject.entity.UserCredentials;
 import com.example.foneproject.handler.JsonResponseHandler;
 import com.example.foneproject.service.UserCredentialsService;
@@ -33,9 +33,9 @@ public class AdminController {
     }
 
     @PostMapping("/authorities")
-    public ResponseEntity<Map<String, Object>> assignRoles(@RequestParam("email") String email, @RequestBody AuthoritiesRequestDTO authoritiesRequestDTO) {
-        UserCredentials userCredentials = modelMapper.map(authoritiesRequestDTO, UserCredentials.class);
-        userCredentialsService.assignRole(authoritiesRequestDTO.getAuthorities(), email);
+    public ResponseEntity<Map<String, Object>> assignRoles(@RequestParam("email") String email, @RequestBody AuthoritiesReqDTO authoritiesReqDTO) {
+        UserCredentials userCredentials = modelMapper.map(authoritiesReqDTO, UserCredentials.class);
+        userCredentialsService.assignRole(authoritiesReqDTO.getAuthorities(), email);
         return jsonResponseHandler.get("Updated roles for user with email: " + email, HttpStatus.OK.value(), HttpStatus.OK);
     }
 }

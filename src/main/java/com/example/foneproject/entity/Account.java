@@ -11,6 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "accounts")
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +29,6 @@ public class Account {
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_email", foreignKey = @ForeignKey(name = "fk_user_email"))
+    @JoinColumn(name = "customer_email", foreignKey = @ForeignKey(name = "fk_customer_email"))
     private Customer customer;
 }

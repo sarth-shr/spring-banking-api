@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
-public class JwtAuthRequestDTO {
+public class JwtAuthReqDTO {
     @NotEmpty(message = "Email cannot be empty")
     private String email;
 

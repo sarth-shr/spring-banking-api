@@ -1,8 +1,8 @@
 package com.example.foneproject.controller;
 
-import com.example.foneproject.dto.request.CustomerRequestDTO;
-import com.example.foneproject.dto.request.CustomerUpdateRequestDTO;
-import com.example.foneproject.dto.response.CustomerResponseDTO;
+import com.example.foneproject.dto.request.CustomerInfoReqDTO;
+import com.example.foneproject.dto.request.CustomerReqDTO;
+import com.example.foneproject.dto.response.CustomerResDTO;
 import com.example.foneproject.entity.Customer;
 import com.example.foneproject.handler.JsonResponseHandler;
 import com.example.foneproject.handler.PaginationResponseHandler;
@@ -26,8 +26,8 @@ public class CustomerController {
     private final JsonResponseHandler jsonResponseHandler;
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> saveUser(@Valid @RequestBody CustomerRequestDTO customerRequestDTO) {
-        Customer customer = modelMapper.map(customerRequestDTO, Customer.class);
+    public ResponseEntity<Map<String, Object>> saveUser(@Valid @RequestBody CustomerReqDTO customerReqDTO) {
+        Customer customer = modelMapper.map(customerReqDTO, Customer.class);
         customerService.save(customer);
 
         return jsonResponseHandler.get("Email registered successfully", HttpStatus.CREATED.value(), HttpStatus.CREATED);
@@ -36,8 +36,8 @@ public class CustomerController {
     @GetMapping
     public ResponseEntity<Map<String, Object>> getUsers(@RequestParam(name = "page", defaultValue = "0") int page) {
         Page<Customer> customers = customerService.getAll(page);
-        Page<CustomerResponseDTO> customerResponseDTOPage = customers.map(customer -> modelMapper.map(customer, CustomerResponseDTO.class));
-        PaginationResponseHandler<CustomerResponseDTO> customerPage = new PaginationResponseHandler<>(customerResponseDTOPage);
+        Page<CustomerResDTO> customerResDTOPage = customers.map(customer -> modelMapper.map(customer, CustomerResDTO.class));
+        PaginationResponseHandler<CustomerResDTO> customerPage = new PaginationResponseHandler<>(customerResDTOPage);
 
         return jsonResponseHandler.get("Retrieved customers list", HttpStatus.OK.value(), HttpStatus.OK, customerPage);
     }
@@ -45,15 +45,15 @@ public class CustomerController {
     @GetMapping("/get")
     public ResponseEntity<Map<String, Object>> getUser(@RequestParam("email") String email) {
         Customer customer = customerService.get(email);
-        CustomerResponseDTO customerResponseDTO = modelMapper.map(customer, CustomerResponseDTO.class);
+        CustomerResDTO customerResDTO = modelMapper.map(customer, CustomerResDTO.class);
 
-        return jsonResponseHandler.get("Retrieved customer with email: " + email, HttpStatus.OK.value(), HttpStatus.OK, customerResponseDTO);
+        return jsonResponseHandler.get("Retrieved customer with email: " + email, HttpStatus.OK.value(), HttpStatus.OK, customerResDTO);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Map<String, Object>> updateUser(@RequestParam("email") String email, @Valid @RequestBody CustomerUpdateRequestDTO customerUpdateRequestDTO) {
-        Customer customer = modelMapper.map(customerUpdateRequestDTO, Customer.class);
-        customerService.update(email, customer);
+    public ResponseEntity<Map<String, Object>> updateUserInformation(@RequestParam("email") String email, @Valid @RequestBody CustomerInfoReqDTO customerInfoReqDTO) {
+        Customer customer = modelMapper.map(customerInfoReqDTO, Customer.class);
+        customerService.updatePersonal(email, customer);
 
         return jsonResponseHandler.get("Updated user with email: " + email, HttpStatus.OK.value(), HttpStatus.OK);
     }
