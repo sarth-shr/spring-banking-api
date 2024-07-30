@@ -1,7 +1,8 @@
 package com.example.foneproject.service.impl;
 
 import com.example.foneproject.dto.request.JwtAuthReqDTO;
-import com.example.foneproject.handler.JsonResponseHandler;
+import com.example.foneproject.handler.ErrorResponseHandler;
+import com.example.foneproject.handler.OkResponseHandler;
 import com.example.foneproject.service.JwtService;
 import com.example.foneproject.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -19,16 +20,21 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
     private final JwtUtils jwtUtils;
-    private final JsonResponseHandler jsonResponseHandler;
+    private final OkResponseHandler okResponseHandler;
+    private final ErrorResponseHandler errorResponseHandler;
     private final AuthenticationManager authenticationManager;
 
     @Override
     public ResponseEntity<Map<String, Object>> get(JwtAuthReqDTO jwtAuthReqDTO) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(jwtAuthReqDTO.getEmail(), jwtAuthReqDTO.getPassword()));
-        if (authentication.isAuthenticated()) {
-            String token = jwtUtils.generateToken(jwtAuthReqDTO.getEmail());
-            return jsonResponseHandler.get("JWT Generated", HttpStatus.OK.value(), HttpStatus.OK, token);
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(jwtAuthReqDTO.getEmail(), jwtAuthReqDTO.getPassword()));
+            if (authentication.isAuthenticated()) {
+                String token = jwtUtils.generateToken(jwtAuthReqDTO.getEmail());
+                return okResponseHandler.get("JWT Generated", HttpStatus.OK, token);
+            }
+            throw new BadCredentialsException("Invalid Credentials");
+        } catch (RuntimeException e) {
+            return errorResponseHandler.get(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
-        throw new BadCredentialsException("Invalid Credentials");
     }
 }

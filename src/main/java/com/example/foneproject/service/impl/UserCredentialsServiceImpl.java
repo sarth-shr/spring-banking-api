@@ -4,11 +4,13 @@ import com.example.foneproject.dto.request.AuthoritiesReqDTO;
 import com.example.foneproject.entity.Customer;
 import com.example.foneproject.entity.UserCredentials;
 import com.example.foneproject.exception.ResourceNotFoundException;
-import com.example.foneproject.handler.JsonResponseHandler;
+import com.example.foneproject.handler.ErrorResponseHandler;
+import com.example.foneproject.handler.OkResponseHandler;
 import com.example.foneproject.repository.UserCredentialsRepository;
 import com.example.foneproject.service.UserCredentialsService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -19,12 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserCredentialsServiceImpl implements UserCredentialsService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
-    private final JsonResponseHandler jsonResponseHandler;
+    private final OkResponseHandler okResponseHandler;
+    private final ErrorResponseHandler errorResponseHandler;
     private final UserCredentialsRepository userCredentialsRepository;
 
     @Value("${credentials.admin.secret}")
@@ -42,63 +46,91 @@ public class UserCredentialsServiceImpl implements UserCredentialsService {
     @Override
     @PostConstruct
     public void loadAdmin() {
-        UserCredentials userCredentials = new UserCredentials();
-        userCredentials.setEmail(ADMIN_EMAIL);
-        userCredentials.setPassword(passwordEncoder.encode(ADMIN_SECRET));
-        userCredentials.setEnabled(true);
-        userCredentials.setAuthorities(ADMIN_AUTHORITIES);
-        userCredentialsRepository.save(userCredentials);
+        try {
+            UserCredentials userCredentials = new UserCredentials();
+            userCredentials.setEmail(ADMIN_EMAIL);
+            userCredentials.setPassword(passwordEncoder.encode(ADMIN_SECRET));
+            userCredentials.setEnabled(true);
+            userCredentials.setAuthorities(ADMIN_AUTHORITIES);
+            userCredentialsRepository.save(userCredentials);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Override
     public void save(Customer customer) {
-        UserCredentials userCredentials = modelMapper.map(customer, UserCredentials.class);
-        userCredentials.setEnabled(true);
-        userCredentials.setAuthorities(CUSTOMER_AUTHORITIES);
-        userCredentialsRepository.save(userCredentials);
+        try {
+            UserCredentials userCredentials = modelMapper.map(customer, UserCredentials.class);
+            userCredentials.setEnabled(true);
+            userCredentials.setAuthorities(CUSTOMER_AUTHORITIES);
+            userCredentialsRepository.save(userCredentials);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Override
     @Transactional
     public void updateEmail(String email, Customer customer) {
-        UserCredentials userCredentials = modelMapper.map(customer, UserCredentials.class);
-        userCredentialsRepository.updateEmail(email, userCredentials.getEmail());
+        try {
+            UserCredentials userCredentials = modelMapper.map(customer, UserCredentials.class);
+            userCredentialsRepository.updateEmail(email, userCredentials.getEmail());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Override
     @Transactional
     public void updatePassword(String email, Customer customer) {
-        UserCredentials userCredentials = modelMapper.map(customer, UserCredentials.class);
-        userCredentialsRepository.updatePassword(email, passwordEncoder.encode(userCredentials.getPassword()));
+        try {
+            UserCredentials userCredentials = modelMapper.map(customer, UserCredentials.class);
+            userCredentialsRepository.updatePassword(email, passwordEncoder.encode(userCredentials.getPassword()));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Override
     @Transactional
     public ResponseEntity<Map<String, Object>> disableUser(String email) {
-        if (!userCredentialsRepository.existsByEmail(email)) {
-            throw new ResourceNotFoundException(email);
+        try {
+            if (!userCredentialsRepository.existsByEmail(email)) {
+                throw new ResourceNotFoundException(email);
+            }
+            userCredentialsRepository.disableByEmail(email);
+            return okResponseHandler.get("User: " + email + " disabled", HttpStatus.OK);
+        } catch (Exception e) {
+            return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        userCredentialsRepository.disableByEmail(email);
-        return jsonResponseHandler.get("User: " + email + " disabled", HttpStatus.OK.value(), HttpStatus.OK);
     }
 
     @Override
     @Transactional
     public ResponseEntity<Map<String, Object>> enableUser(String email) {
-        if (!userCredentialsRepository.existsByEmail(email)) {
-            throw new ResourceNotFoundException(email);
+        try {
+            if (!userCredentialsRepository.existsByEmail(email)) {
+                throw new ResourceNotFoundException(email);
+            }
+            userCredentialsRepository.enableByEmail(email);
+            return okResponseHandler.get("User: " + email + " enabled", HttpStatus.OK);
+        } catch (Exception e) {
+            return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        userCredentialsRepository.enableByEmail(email);
-        return jsonResponseHandler.get("User: " + email + " enabled", HttpStatus.OK.value(), HttpStatus.OK);
     }
 
     @Override
     @Transactional
     public ResponseEntity<Map<String, Object>> assignRole(String email, AuthoritiesReqDTO authoritiesReqDTO) {
-        if (!userCredentialsRepository.existsByEmail(email)) {
-            throw new ResourceNotFoundException(email);
+        try {
+            if (!userCredentialsRepository.existsByEmail(email)) {
+                throw new ResourceNotFoundException(email);
+            }
+            userCredentialsRepository.assignRoleByEmail(email, authoritiesReqDTO.getAuthorities());
+            return okResponseHandler.get("Updated roles for user: " + email, HttpStatus.OK);
+        } catch (Exception e) {
+            return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        userCredentialsRepository.assignRoleByEmail(email, authoritiesReqDTO.getAuthorities());
-        return jsonResponseHandler.get("Updated roles for user: " + email, HttpStatus.OK.value(), HttpStatus.OK);
     }
 }
