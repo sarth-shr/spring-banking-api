@@ -7,6 +7,7 @@ import com.example.foneproject.repository.AccountRepository;
 import com.example.foneproject.repository.CustomerRepository;
 import com.example.foneproject.service.AccountService;
 import com.example.foneproject.service.TransactionService;
+import com.example.foneproject.util.EmailUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
+    private final EmailUtils emailUtils;
     private final AccountRepository accountRepository;
     private final CustomerRepository customerRepository;
     private final TransactionService transactionService;
@@ -83,6 +85,12 @@ public class AccountServiceImpl implements AccountService {
 
         accountRepository.save(account);
         transactionService.saveDeposit(account, amount);
+
+        emailUtils.sendMail(
+                account.getCustomer().getEmail(),
+                "Amount Deposited",
+                "Amount of " + amount + " has been deposited into your account with ID: " + accId
+        );
     }
 
     @Override
@@ -112,6 +120,18 @@ public class AccountServiceImpl implements AccountService {
         accountRepository.save(toAccount);
 
         transactionService.saveTransfer(fromAccount, toAccount, amount);
+
+        emailUtils.sendMail(
+                fromAccount.getCustomer().getEmail(),
+                "Balance Transferred",
+                "Amount of " + amount + " has been transferred from your account with ID: " + fromId + " into account with ID: " + toId
+        );
+
+        emailUtils.sendMail(
+                toAccount.getCustomer().getEmail(),
+                "Balance Transfer Received",
+                "Amount of " + amount + " has been transferred into your account with ID: " + toId + " from account with ID: " + fromId
+        );
     }
 
     @Override

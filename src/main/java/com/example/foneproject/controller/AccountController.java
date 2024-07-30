@@ -6,7 +6,6 @@ import com.example.foneproject.entity.Account;
 import com.example.foneproject.handler.JsonResponseHandler;
 import com.example.foneproject.handler.PaginationResponseHandler;
 import com.example.foneproject.service.AccountService;
-import com.example.foneproject.util.EmailUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -21,7 +20,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/accounts")
 public class AccountController {
-    private final EmailUtils emailUtils;
     private final ModelMapper modelMapper;
     private final AccountService accountService;
     private final JsonResponseHandler jsonResponseHandler;
@@ -54,30 +52,12 @@ public class AccountController {
     public ResponseEntity<Map<String, Object>> depositFunds(@PathVariable("accId") int accId, @RequestParam("amount") int amount) {
         accountService.deposit(accId, amount);
 
-        emailUtils.sendMail(
-                accountService.get(accId).getCustomer().getEmail(),
-                "Amount Deposited",
-                "Amount of " + amount + " has been deposited into your account with ID: " + accId
-        );
-
         return jsonResponseHandler.get("Amount: " + amount + " deposited to account with ID: " + accId, HttpStatus.OK.value(), HttpStatus.OK);
     }
 
     @PostMapping("/transfer")
     public ResponseEntity<Map<String, Object>> transferFunds(@RequestParam("fromId") int fromId, @RequestParam("toId") int toId, @RequestParam("amount") int amount) {
         accountService.transfer(fromId, toId, amount);
-
-        emailUtils.sendMail(
-                accountService.get(fromId).getCustomer().getEmail(),
-                "Balance Transferred",
-                "Amount of " + amount + " has been transferred from your account with ID: " + fromId + " into account with ID: " + toId
-        );
-
-        emailUtils.sendMail(
-                accountService.get(toId).getCustomer().getEmail(),
-                "Balance Transfer Received",
-                "Amount of " + amount + " has been transferred into your account with ID: " + toId + " from account with ID: " + fromId
-        );
 
         return jsonResponseHandler.get("Amount: " + amount + " transferred from account with ID: " + fromId + " to account with ID: " + toId, HttpStatus.OK.value(), HttpStatus.OK);
     }
