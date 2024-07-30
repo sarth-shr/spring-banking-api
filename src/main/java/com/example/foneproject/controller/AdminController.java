@@ -1,12 +1,9 @@
 package com.example.foneproject.controller;
 
 import com.example.foneproject.dto.request.AuthoritiesReqDTO;
-import com.example.foneproject.entity.UserCredentials;
-import com.example.foneproject.handler.JsonResponseHandler;
 import com.example.foneproject.service.UserCredentialsService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,26 +13,20 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin")
 public class AdminController {
-    private final ModelMapper modelMapper;
-    private final JsonResponseHandler jsonResponseHandler;
     private final UserCredentialsService userCredentialsService;
 
     @PostMapping("/disable")
     public ResponseEntity<Map<String, Object>> disableUser(@RequestParam("email") String email) {
-        userCredentialsService.disableUser(email);
-        return jsonResponseHandler.get("User with email: " + email + " disabled", HttpStatus.OK.value(), HttpStatus.OK);
+        return userCredentialsService.disableUser(email);
     }
 
     @PostMapping("/enable")
     public ResponseEntity<Map<String, Object>> enableUser(@RequestParam("email") String email) {
-        userCredentialsService.enableUser(email);
-        return jsonResponseHandler.get("User with email: " + email + " enabled", HttpStatus.OK.value(), HttpStatus.OK);
+        return userCredentialsService.enableUser(email);
     }
 
     @PostMapping("/authorities")
-    public ResponseEntity<Map<String, Object>> assignRoles(@RequestParam("email") String email, @RequestBody AuthoritiesReqDTO authoritiesReqDTO) {
-        UserCredentials userCredentials = modelMapper.map(authoritiesReqDTO, UserCredentials.class);
-        userCredentialsService.assignRole(authoritiesReqDTO.getAuthorities(), email);
-        return jsonResponseHandler.get("Updated roles for user with email: " + email, HttpStatus.OK.value(), HttpStatus.OK);
+    public ResponseEntity<Map<String, Object>> assignRoles(@RequestParam("email") String email, @RequestBody @Valid AuthoritiesReqDTO authoritiesReqDTO) {
+        return userCredentialsService.assignRole(email, authoritiesReqDTO);
     }
 }

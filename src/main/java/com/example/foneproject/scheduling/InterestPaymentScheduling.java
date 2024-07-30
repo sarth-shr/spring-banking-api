@@ -26,7 +26,7 @@ public class InterestPaymentScheduling {
         for (Account acc : accounts) {
             Float interest = acc.getInterest();
             float currentBalance = acc.getBalance();
-            if (interest != null) {
+            if (interest > 0) {
                 float interestPaid = currentBalance * interest / 100;
                 acc.setBalance((int) (currentBalance + interestPaid));
                 accountRepository.save(acc);

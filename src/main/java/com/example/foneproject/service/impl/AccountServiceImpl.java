@@ -1,48 +1,68 @@
 package com.example.foneproject.service.impl;
 
+import com.example.foneproject.dto.request.AccountReqDTO;
+import com.example.foneproject.dto.response.AccountResDTO;
 import com.example.foneproject.entity.Account;
 import com.example.foneproject.entity.Customer;
 import com.example.foneproject.exception.*;
+import com.example.foneproject.handler.JsonResponseHandler;
+import com.example.foneproject.handler.PaginationResponseHandler;
 import com.example.foneproject.repository.AccountRepository;
 import com.example.foneproject.repository.CustomerRepository;
 import com.example.foneproject.service.AccountService;
 import com.example.foneproject.service.TransactionService;
 import com.example.foneproject.util.EmailUtils;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
     private final EmailUtils emailUtils;
+    private final ModelMapper modelMapper;
     private final AccountRepository accountRepository;
     private final CustomerRepository customerRepository;
     private final TransactionService transactionService;
+    private final JsonResponseHandler jsonResponseHandler;
 
     @Override
-    public Account get(int id) {
+    public ResponseEntity<Map<String, Object>> get(int id) {
         Optional<Account> accountOptional = accountRepository.findById(id);
         if (accountOptional.isEmpty()) {
             throw new ResourceNotFoundException(id);
         }
-        return accountOptional.get();
+
+        Account account = accountOptional.get();
+        AccountResDTO accountResDTO = modelMapper.map(account, AccountResDTO.class);
+
+        return jsonResponseHandler.get("Retrieved account with ID: " + id, HttpStatus.OK.value(), HttpStatus.OK, accountResDTO);
     }
 
     @Override
-    public Page<Account> getAll(int page) {
-        List<Account> accounts = accountRepository.findAll();
+    public ResponseEntity<Map<String, Object>> getAll(int page) {
         Pageable pageRequest = PageRequest.of(page, 3);
-        return accountRepository.findAll(pageRequest);
+
+        Page<Account> accountPage = accountRepository.findAll(pageRequest);
+        Page<AccountResDTO> accountDTOPage = accountPage.map(account -> modelMapper.map(account, AccountResDTO.class));
+        PaginationResponseHandler<AccountResDTO> accounts = new PaginationResponseHandler<>(accountDTOPage);
+
+        return jsonResponseHandler.get("Retrieved all accounts", HttpStatus.OK.value(), HttpStatus.OK, accounts);
     }
 
     @Override
-    public void open(Account account) {
+    public ResponseEntity<Map<String, Object>> open(AccountReqDTO accountReqDTO) {
+        Account account = modelMapper.map(accountReqDTO, Account.class);
+
         String email = account.getCustomer().getEmail();
         Optional<Customer> customerOptional = customerRepository.findByEmail(email);
         if (customerOptional.isEmpty()) {
@@ -60,7 +80,7 @@ public class AccountServiceImpl implements AccountService {
         if (accType.equals("saving")) {
             account.setInterest(5.5f);
         } else {
-            account.setInterest(null);
+            account.setInterest(0.0f);
         }
 
         List<Account> assoicatedEmailsList = accountRepository.findByCustomer_Email(registeredCustomer.getEmail());
@@ -71,14 +91,16 @@ public class AccountServiceImpl implements AccountService {
             account.setBalance(openingBalance);
             accountRepository.save(account);
         }
+        return jsonResponseHandler.get("Account successfully opened", HttpStatus.CREATED.value(), HttpStatus.CREATED);
     }
 
     @Override
-    public void deposit(int accId, int amount) {
+    public ResponseEntity<Map<String, Object>> deposit(int accId, int amount) {
         Optional<Account> accountOptional = accountRepository.findById(accId);
         if (accountOptional.isEmpty()) {
             throw new ResourceNotFoundException(accId);
         }
+
         Account account = accountOptional.get();
         int currentBalance = account.getBalance();
         account.setBalance(currentBalance + amount);
@@ -91,10 +113,12 @@ public class AccountServiceImpl implements AccountService {
                 "Amount Deposited",
                 "Amount of " + amount + " has been deposited into your account with ID: " + accId
         );
+
+        return jsonResponseHandler.get("Amount: " + amount + " deposited to account with ID: " + accId, HttpStatus.OK.value(), HttpStatus.OK);
     }
 
     @Override
-    public void transfer(int fromId, int toId, int amount) {
+    public ResponseEntity<Map<String, Object>> transfer(int fromId, int toId, int amount) {
         if (fromId == toId) {
             throw new SameTransferIdException();
         }
@@ -132,10 +156,12 @@ public class AccountServiceImpl implements AccountService {
                 "Balance Transfer Received",
                 "Amount of " + amount + " has been transferred into your account with ID: " + toId + " from account with ID: " + fromId
         );
+
+        return jsonResponseHandler.get("Amount: " + amount + " transferred from account with ID: " + fromId + " to account with ID: " + toId, HttpStatus.OK.value(), HttpStatus.OK);
     }
 
     @Override
-    public void delete(int id) {
+    public ResponseEntity<Map<String, Object>> delete(int id) {
         Optional<Account> accountOptional = accountRepository.findById(id);
         if (accountOptional.isEmpty()) {
             throw new ResourceNotFoundException(id);
@@ -146,6 +172,7 @@ public class AccountServiceImpl implements AccountService {
             throw new ActiveBalanceException(id, account.getBalance());
         }
         accountRepository.deleteById(id);
+        return jsonResponseHandler.get("Account ID: " + id + " deleted successfully", HttpStatus.OK.value(), HttpStatus.OK);
     }
 
 

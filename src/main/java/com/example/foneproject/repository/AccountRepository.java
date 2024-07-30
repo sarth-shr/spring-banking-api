@@ -7,6 +7,4 @@ import java.util.List;
 
 public interface AccountRepository extends JpaRepository<Account, Integer> {
     List<Account> findByCustomer_Email(String email);
-
-    boolean existsByType(String type);
 }

@@ -13,10 +13,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.Arrays;
 import java.util.Collection;
 
-@Entity
 @Data
-@AllArgsConstructor
+@Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "user_credentials")
 public class UserCredentials {
     @Id

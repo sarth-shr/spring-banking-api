@@ -1,11 +1,9 @@
 package com.example.foneproject.controller;
 
 import com.example.foneproject.dto.request.JwtAuthReqDTO;
-import com.example.foneproject.handler.JsonResponseHandler;
 import com.example.foneproject.service.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,12 +17,9 @@ import java.util.Map;
 @RequestMapping("/api/v1/jwt")
 public class JwtController {
     private final JwtService jwtService;
-    private final JsonResponseHandler jsonResponseHandler;
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> getToken(@Valid @RequestBody JwtAuthReqDTO jwtAuthReqDTO) {
-        String token = jwtService.get(jwtAuthReqDTO);
-        return jsonResponseHandler.get("Jwt Generated", HttpStatus.OK.value(), HttpStatus.OK, token);
-
+        return jwtService.get(jwtAuthReqDTO);
     }
 }

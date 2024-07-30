@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
-@Entity
 @Data
+@Entity
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

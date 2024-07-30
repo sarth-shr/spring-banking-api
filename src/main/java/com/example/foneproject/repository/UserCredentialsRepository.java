@@ -13,12 +13,12 @@ public interface UserCredentialsRepository extends JpaRepository<UserCredentials
     Optional<UserCredentials> findByEmail(String email);
 
     @Modifying
-    @Query("update UserCredentials uc set uc.email= ?1 where uc.email= ?2")
-    void updateEmail(String newEmail, String currentEmail);
+    @Query("update UserCredentials uc set uc.email= ?2 where uc.email= ?1")
+    void updateEmail(String currentEmail, String newEmail);
 
     @Modifying
-    @Query("update UserCredentials uc set uc.password= ?1 where uc.email= ?2")
-    void updatePassword(String password, String email);
+    @Query("update UserCredentials uc set uc.password= ?2 where uc.email= ?1")
+    void updatePassword(String email, String password);
 
     @Modifying
     @Query("update UserCredentials uc set uc.enabled= false where uc.email= ?1")
@@ -29,6 +29,6 @@ public interface UserCredentialsRepository extends JpaRepository<UserCredentials
     void enableByEmail(String email);
 
     @Modifying
-    @Query("update UserCredentials uc set uc.authorities= ?1 where uc.email= ?2")
-    void assignRoleByEmail(String authorities, String email);
+    @Query("update UserCredentials uc set uc.authorities= ?2 where uc.email= ?1")
+    void assignRoleByEmail(String email, String authorities);
 }

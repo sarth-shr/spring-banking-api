@@ -17,8 +17,8 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
     void updatePersonalDetails(String firstName, String lastName, String email);
 
     @Modifying
-    @Query("update Customer c set c.email= ?1 where c.email = ?2")
-    void updateEmail(String newEmail, String currentEmail);
+    @Query("update Customer c set c.email= ?2 where c.email = ?1")
+    void updateEmail(String currentEmail, String newEmail);
 
     @Modifying
     @Query("update Customer c set c.password= ?1 where c.email= ?2")

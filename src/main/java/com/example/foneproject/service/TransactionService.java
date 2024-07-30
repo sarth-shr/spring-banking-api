@@ -1,8 +1,9 @@
 package com.example.foneproject.service;
 
 import com.example.foneproject.entity.Account;
-import com.example.foneproject.entity.Transaction;
-import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+
+import java.util.Map;
 
 public interface TransactionService {
     void saveDeposit(Account account, int amount);
@@ -11,7 +12,7 @@ public interface TransactionService {
 
     void saveInterest(Account account, int amount);
 
-    Page<Transaction> getAll(int page);
+    ResponseEntity<Map<String, Object>> getAll(int page);
 
-    Page<Transaction> getByAccount(int page, int accId);
+    ResponseEntity<Map<String, Object>> getByAccount(int page, int accId);
 }

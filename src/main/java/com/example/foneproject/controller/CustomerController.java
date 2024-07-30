@@ -4,16 +4,9 @@ import com.example.foneproject.dto.request.CustomerEmailReqDTO;
 import com.example.foneproject.dto.request.CustomerInfoReqDTO;
 import com.example.foneproject.dto.request.CustomerPasswordReqDTO;
 import com.example.foneproject.dto.request.CustomerReqDTO;
-import com.example.foneproject.dto.response.CustomerResDTO;
-import com.example.foneproject.entity.Customer;
-import com.example.foneproject.handler.JsonResponseHandler;
-import com.example.foneproject.handler.PaginationResponseHandler;
 import com.example.foneproject.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,56 +16,35 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/customers")
 public class CustomerController {
-    private final ModelMapper modelMapper;
     private final CustomerService customerService;
-    private final JsonResponseHandler jsonResponseHandler;
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> saveUser(@Valid @RequestBody CustomerReqDTO customerReqDTO) {
-        Customer customer = modelMapper.map(customerReqDTO, Customer.class);
-        customerService.save(customer);
-
-        return jsonResponseHandler.get("Email registered successfully", HttpStatus.CREATED.value(), HttpStatus.CREATED);
-    }
-
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> getUsers(@RequestParam(name = "page", defaultValue = "0") int page) {
-        Page<Customer> customers = customerService.getAll(page);
-        Page<CustomerResDTO> customerResDTOPage = customers.map(customer -> modelMapper.map(customer, CustomerResDTO.class));
-        PaginationResponseHandler<CustomerResDTO> customerPage = new PaginationResponseHandler<>(customerResDTOPage);
-
-        return jsonResponseHandler.get("Retrieved customers list", HttpStatus.OK.value(), HttpStatus.OK, customerPage);
+        return customerService.save(customerReqDTO);
     }
 
     @GetMapping("/get")
     public ResponseEntity<Map<String, Object>> getUser(@RequestParam("email") String email) {
-        Customer customer = customerService.get(email);
-        CustomerResDTO customerResDTO = modelMapper.map(customer, CustomerResDTO.class);
+        return customerService.get(email);
+    }
 
-        return jsonResponseHandler.get("Retrieved customer with email: " + email, HttpStatus.OK.value(), HttpStatus.OK, customerResDTO);
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getUsers(@RequestParam(name = "page", defaultValue = "0") int page) {
+        return customerService.getAll(page);
     }
 
     @PutMapping("/update/personal")
     public ResponseEntity<Map<String, Object>> updateUserInformation(@RequestParam("email") String email, @Valid @RequestBody CustomerInfoReqDTO customerInfoReqDTO) {
-        Customer customer = modelMapper.map(customerInfoReqDTO, Customer.class);
-        customerService.updatePersonal(email, customer);
-
-        return jsonResponseHandler.get("Updated personal details of email: " + email, HttpStatus.OK.value(), HttpStatus.OK);
+        return customerService.updatePersonal(email, customerInfoReqDTO);
     }
 
     @PutMapping("/update/email")
     public ResponseEntity<Map<String, Object>> updateUserEmail(@RequestParam("email") String email, @Valid @RequestBody CustomerEmailReqDTO customerEmailReqDTO) {
-        Customer customer = modelMapper.map(customerEmailReqDTO, Customer.class);
-        customerService.updateEmail(email, customer);
-
-        return jsonResponseHandler.get("Email changed successfully", HttpStatus.OK.value(), HttpStatus.OK);
+        return customerService.updateEmail(email, customerEmailReqDTO);
     }
 
     @PutMapping("update/password")
     public ResponseEntity<Map<String, Object>> updateUserPassword(@RequestParam("email") String email, @Valid @RequestBody CustomerPasswordReqDTO customerPasswordReqDTO) {
-        Customer customer = modelMapper.map(customerPasswordReqDTO, Customer.class);
-        customerService.updatePassword(customerPasswordReqDTO.getCurrentPassword(), email, customer);
-
-        return jsonResponseHandler.get("Password changed successfully", HttpStatus.OK.value(), HttpStatus.OK);
+        return customerService.updatePassword(email, customerPasswordReqDTO);
     }
 }
