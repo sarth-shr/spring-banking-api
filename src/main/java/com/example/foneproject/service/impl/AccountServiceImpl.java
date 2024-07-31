@@ -137,11 +137,11 @@ public class AccountServiceImpl implements AccountService {
             accountRepository.depositAmount(accId, amount);
             transactionService.saveDeposit(account, amount);
 
-            emailUtils.sendMail(
-                    account.getCustomer().getEmail(),
-                    "Amount Deposited",
-                    "Amount of " + amount + " has been deposited into your account with ID: " + accId
-            );
+//            emailUtils.sendMail(
+//                    account.getCustomer().getEmail(),
+//                    "Amount Deposited",
+//                    "Amount of " + amount + " has been deposited into your account with ID: " + accId
+//            );
 
             return okResponseHandler.get("Amount: " + amount + " deposited to account with ID: " + accId, HttpStatus.OK);
         } catch (Exception e) {
@@ -178,17 +178,17 @@ public class AccountServiceImpl implements AccountService {
 
             transactionService.saveTransfer(fromAccount, toAccount, amount);
 
-            emailUtils.sendMail(
-                    fromAccount.getCustomer().getEmail(),
-                    "Balance Transferred",
-                    "Amount of " + amount + " has been transferred from your account with ID: " + fromId + " into account with ID: " + toId
-            );
-
-            emailUtils.sendMail(
-                    toAccount.getCustomer().getEmail(),
-                    "Balance Transfer Received",
-                    "Amount of " + amount + " has been transferred into your account with ID: " + toId + " from account with ID: " + fromId
-            );
+//            emailUtils.sendMail(
+//                    fromAccount.getCustomer().getEmail(),
+//                    "Balance Transferred",
+//                    "Amount of " + amount + " has been transferred from your account with ID: " + fromId + " into account with ID: " + toId
+//            );
+//
+//            emailUtils.sendMail(
+//                    toAccount.getCustomer().getEmail(),
+//                    "Balance Transfer Received",
+//                    "Amount of " + amount + " has been transferred into your account with ID: " + toId + " from account with ID: " + fromId
+//            );
 
             return okResponseHandler.get("Amount: " + amount + " transferred from account with ID: " + fromId + " to account with ID: " + toId, HttpStatus.OK);
         } catch (Exception e) {
