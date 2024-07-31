@@ -15,9 +15,14 @@ import java.util.Map;
 public class AccountController {
     private final AccountService accountService;
 
-    @GetMapping("/{accId}")
-    public ResponseEntity<Map<String, Object>> getAccount(@PathVariable("accId") int id) {
+    @GetMapping("/get-by-id")
+    public ResponseEntity<Map<String, Object>> getAccount(@RequestParam("accId") int id) {
         return accountService.get(id);
+    }
+
+    @GetMapping("/get-by-email")
+    public ResponseEntity<Map<String, Object>> getAccountsByEmail(@RequestParam("email") String email, @RequestParam(name = "page", defaultValue = "0") int page) {
+        return accountService.getAllByEmail(email, page);
     }
 
     @GetMapping
@@ -30,8 +35,8 @@ public class AccountController {
         return accountService.open(accountReqDTO);
     }
 
-    @PostMapping("/deposit/{accId}")
-    public ResponseEntity<Map<String, Object>> depositFunds(@PathVariable("accId") int accId, @RequestParam("amount") int amount) {
+    @PostMapping("/deposit")
+    public ResponseEntity<Map<String, Object>> depositFunds(@RequestParam("accId") int accId, @RequestParam("amount") int amount) {
         return accountService.deposit(accId, amount);
     }
 
@@ -40,8 +45,8 @@ public class AccountController {
         return accountService.transfer(fromId, toId, amount);
     }
 
-    @DeleteMapping("delete/{accId}")
-    public ResponseEntity<Map<String, Object>> deleteAccount(@PathVariable("accId") int id) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<Map<String, Object>> deleteAccount(@RequestParam("accId") int id) {
         return accountService.delete(id);
     }
 }

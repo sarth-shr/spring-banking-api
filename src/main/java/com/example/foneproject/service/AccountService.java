@@ -8,6 +8,8 @@ import java.util.Map;
 public interface AccountService {
     ResponseEntity<Map<String, Object>> get(int id);
 
+    ResponseEntity<Map<String, Object>> getAllByEmail(String email, int page);
+
     ResponseEntity<Map<String, Object>> getAll(int page);
 
     ResponseEntity<Map<String, Object>> open(AccountReqDTO accountReqDTO);

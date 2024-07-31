@@ -5,11 +5,13 @@ import com.example.foneproject.repository.AccountRepository;
 import com.example.foneproject.service.TransactionService;
 import com.example.foneproject.util.EmailUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class InterestPaymentScheduling {
@@ -21,6 +23,7 @@ public class InterestPaymentScheduling {
     public void payInterest() {
         List<Account> accounts = accountRepository.findAll();
         if (accounts.isEmpty()) {
+            log.info("No Accounts liable for interest");
             return;
         }
         for (Account acc : accounts) {
@@ -31,6 +34,8 @@ public class InterestPaymentScheduling {
                 acc.setBalance((int) (currentBalance + interestPaid));
                 accountRepository.save(acc);
                 transactionService.saveInterest(acc, (int) interestPaid);
+
+                log.info("Interest of amount: {} has been credited to account ID: {}", interestPaid, acc.getId());
 
                 emailUtils.sendMail(
                         acc.getCustomer().getEmail(),

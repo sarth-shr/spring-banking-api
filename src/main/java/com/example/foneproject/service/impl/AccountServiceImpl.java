@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,21 @@ public class AccountServiceImpl implements AccountService {
             AccountResDTO accountResDTO = modelMapper.map(account, AccountResDTO.class);
 
             return okResponseHandler.get("Retrieved account with ID: " + id, HttpStatus.OK, accountResDTO);
+        } catch (Exception e) {
+            return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Map<String, Object>> getAllByEmail(String email, int page) {
+        try {
+            Pageable pageRequest = PageRequest.of(page, 3);
+
+            Page<Account> accountPage = accountRepository.findByEmailPageable(pageRequest, email);
+            Page<AccountResDTO> accountDTOPage = accountPage.map(account -> modelMapper.map(account, AccountResDTO.class));
+            PaginationResponseHandler<AccountResDTO> accounts = new PaginationResponseHandler<>(accountDTOPage);
+
+            return okResponseHandler.get("Retrieved accounts associated with email: " + email, HttpStatus.OK, accounts);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -84,7 +100,7 @@ public class AccountServiceImpl implements AccountService {
             int openingBalance = account.getBalance();
 
             String accType = account.getType();
-            if (!(accType.equals("saving") || accType.equals("checking"))) {
+            if (!(accType.equalsIgnoreCase("saving") || accType.equals("checking"))) {
                 throw new UnsupportedAccTypeException();
             }
 
@@ -109,6 +125,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<Map<String, Object>> deposit(int accId, int amount) {
         try {
             Optional<Account> accountOptional = accountRepository.findById(accId);
@@ -117,10 +134,7 @@ public class AccountServiceImpl implements AccountService {
             }
 
             Account account = accountOptional.get();
-            int currentBalance = account.getBalance();
-            account.setBalance(currentBalance + amount);
-
-            accountRepository.save(account);
+            accountRepository.depositAmount(accId, amount);
             transactionService.saveDeposit(account, amount);
 
             emailUtils.sendMail(

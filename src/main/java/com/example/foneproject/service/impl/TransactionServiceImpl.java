@@ -114,9 +114,9 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new ResourceNotFoundException(accId);
             }
 
-            Pageable pageable = PageRequest.of(page, 3);
+            Pageable pageRequest = PageRequest.of(page, 3);
 
-            Page<Transaction> transactionPage = transactionRepository.findByAccountPageable(pageable, accId);
+            Page<Transaction> transactionPage = transactionRepository.findByAccountPageable(pageRequest, accId);
             Page<TransactionResDTO> transactionDTOPage = transactionPage.map(transaction -> modelMapper.map(transaction, TransactionResDTO.class));
             PaginationResponseHandler<TransactionResDTO> transactions = new PaginationResponseHandler<>(transactionDTOPage);
 
