@@ -35,4 +35,5 @@ public class UserCredentials {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Arrays.stream(authorities.split(",")).map(SimpleGrantedAuthority::new).toList();
     }
+
 }

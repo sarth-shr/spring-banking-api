@@ -4,20 +4,27 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 @Component
+@RequiredArgsConstructor
 public class JwtUtils {
     @Value("${security.jwt.secret-key}")
     private String SECRET;
+
+    private final UserDetailsService userDetailsService;
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
@@ -25,6 +32,7 @@ public class JwtUtils {
     }
 
     private String createToken(Map<String, Object> claims, String username) {
+        Collection<? extends GrantedAuthority> authorities = userDetailsService.loadUserByUsername(username).getAuthorities();
         return Jwts
                 .builder()
                 .header()
@@ -34,6 +42,7 @@ public class JwtUtils {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30))
                 .signWith(getSignInKey())
+                .claim("authorities", authorities.toString())
                 .compact();
     }
 

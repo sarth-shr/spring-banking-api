@@ -37,11 +37,11 @@ public class InterestPaymentScheduling {
 
                 log.info("Interest of amount: {} has been credited to account ID: {}", interestPaid, acc.getId());
 
-                emailUtils.sendMail(
-                        acc.getCustomer().getEmail(),
-                        "Interest Received",
-                        "Interest of amount: " + interestPaid + " has been credited to your account with ID: " + acc.getId()
-                );
+//                emailUtils.sendMail(
+//                        acc.getCustomer().getEmail(),
+//                        "Interest Received",
+//                        "Interest of amount: " + interestPaid + " has been credited to your account with ID: " + acc.getId()
+//                );
             }
         }
     }
