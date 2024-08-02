@@ -38,8 +38,8 @@ public class TransactionServiceImpl implements TransactionService {
             Transaction transaction = Transaction.builder()
                     .type("DEPOSIT")
                     .toAccount(account)
-                    .toAccOldBalance(account.getBalance() - amount)
-                    .toAccNewBalance(account.getBalance())
+                    .toAccOldBalance(account.getBalance())
+                    .toAccNewBalance(account.getBalance() + amount)
                     .amount(amount)
                     .date(new Date())
                     .build();

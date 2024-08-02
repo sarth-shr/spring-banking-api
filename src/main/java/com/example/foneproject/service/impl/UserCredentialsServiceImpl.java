@@ -51,7 +51,7 @@ public class UserCredentialsServiceImpl implements UserCredentialsService {
             userCredentials.setEmail(ADMIN_EMAIL);
             userCredentials.setPassword(passwordEncoder.encode(ADMIN_SECRET));
             userCredentials.setEnabled(true);
-            userCredentials.setAuthorities(ADMIN_AUTHORITIES + "," + CUSTOMER_AUTHORITIES);
+            userCredentials.setAuthorities(ADMIN_AUTHORITIES);
             userCredentialsRepository.save(userCredentials);
         } catch (Exception e) {
             log.error(e.getMessage());
