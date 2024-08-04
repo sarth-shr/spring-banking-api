@@ -30,7 +30,7 @@ public class JwtServiceImpl implements JwtService {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(jwtAuthReqDTO.getEmail(), jwtAuthReqDTO.getPassword()));
             if (authentication.isAuthenticated()) {
                 String token = jwtUtils.generateToken(jwtAuthReqDTO.getEmail());
-                return okResponseHandler.get("JWT Generated", HttpStatus.OK, token);
+                return okResponseHandler.getHeaders("JWT Generated", HttpStatus.OK, token);
             }
             throw new BadCredentialsException("Invalid Credentials");
         } catch (RuntimeException e) {

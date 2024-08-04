@@ -6,7 +6,6 @@ import com.example.foneproject.entity.Transaction;
 import com.example.foneproject.exception.ResourceNotFoundException;
 import com.example.foneproject.handler.ErrorResponseHandler;
 import com.example.foneproject.handler.OkResponseHandler;
-import com.example.foneproject.handler.PaginationResponseHandler;
 import com.example.foneproject.repository.TransactionRepository;
 import com.example.foneproject.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -97,9 +96,8 @@ public class TransactionServiceImpl implements TransactionService {
 
             Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
             Page<TransactionResDTO> transactionDTOPage = transactionPage.map(transaction -> modelMapper.map(transaction, TransactionResDTO.class));
-            PaginationResponseHandler<TransactionResDTO> transactions = new PaginationResponseHandler<>(transactionDTOPage);
 
-            return okResponseHandler.get("Retrieved all transactions", HttpStatus.OK, transactions);
+            return okResponseHandler.getPaginated("Retrieved all transactions", HttpStatus.OK, transactionDTOPage);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -107,7 +105,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> getByAccount(int page, int accId) {
+    public ResponseEntity<Map<String, Object>> getAllByAccount(int page, int accId) {
         try {
             List<Transaction> transactionAccount = transactionRepository.findByAccountId(accId);
             if (transactionAccount.isEmpty()) {
@@ -118,9 +116,8 @@ public class TransactionServiceImpl implements TransactionService {
 
             Page<Transaction> transactionPage = transactionRepository.findByAccountPageable(pageRequest, accId);
             Page<TransactionResDTO> transactionDTOPage = transactionPage.map(transaction -> modelMapper.map(transaction, TransactionResDTO.class));
-            PaginationResponseHandler<TransactionResDTO> transactions = new PaginationResponseHandler<>(transactionDTOPage);
 
-            return okResponseHandler.get("Retrieved all transactions associated with account ID: " + accId, HttpStatus.OK, transactions);
+            return okResponseHandler.getContent("Retrieved all transactions associated with account ID: " + accId, HttpStatus.OK, transactionDTOPage);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }

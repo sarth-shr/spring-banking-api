@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface AccountRepository extends JpaRepository<Account, Integer> {
+    boolean existsByCustomer_Email(String email);
+
     List<Account> findByCustomer_Email(String email);
 
     @Modifying

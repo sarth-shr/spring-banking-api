@@ -6,13 +6,11 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,11 +26,12 @@ public class JwtUtils {
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
+        String authorities = userDetailsService.loadUserByUsername(username).getAuthorities().toString();
+        claims.put("admin", authorities.contains("ADMIN"));
         return createToken(claims, username);
     }
 
     private String createToken(Map<String, Object> claims, String username) {
-        Collection<? extends GrantedAuthority> authorities = userDetailsService.loadUserByUsername(username).getAuthorities();
         return Jwts
                 .builder()
                 .header()
@@ -42,7 +41,7 @@ public class JwtUtils {
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30))
                 .signWith(getSignInKey())
-                .claim("authorities", authorities.toString())
+                .claims(claims)
                 .compact();
     }
 

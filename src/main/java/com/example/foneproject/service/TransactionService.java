@@ -14,5 +14,5 @@ public interface TransactionService {
 
     ResponseEntity<Map<String, Object>> getAll(int page);
 
-    ResponseEntity<Map<String, Object>> getByAccount(int page, int accId);
+    ResponseEntity<Map<String, Object>> getAllByAccount(int page, int accId);
 }

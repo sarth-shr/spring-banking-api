@@ -19,7 +19,7 @@ public class InterestPaymentScheduling {
     private final AccountRepository accountRepository;
     private final TransactionService transactionService;
 
-    @Scheduled(cron = "*/600 * * * * *")
+    @Scheduled(cron = "0 */30 * * * *")
     public void payInterest() {
         List<Account> accounts = accountRepository.findAll();
         if (accounts.isEmpty()) {

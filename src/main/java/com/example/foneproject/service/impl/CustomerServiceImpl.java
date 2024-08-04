@@ -11,7 +11,6 @@ import com.example.foneproject.exception.InvalidEmailException;
 import com.example.foneproject.exception.ResourceNotFoundException;
 import com.example.foneproject.handler.ErrorResponseHandler;
 import com.example.foneproject.handler.OkResponseHandler;
-import com.example.foneproject.handler.PaginationResponseHandler;
 import com.example.foneproject.repository.CustomerRepository;
 import com.example.foneproject.service.CustomerService;
 import com.example.foneproject.service.UserCredentialsService;
@@ -68,7 +67,7 @@ public class CustomerServiceImpl implements CustomerService {
             Customer customer = customerOptional.get();
             CustomerResDTO customerResDTO = modelMapper.map(customer, CustomerResDTO.class);
 
-            return okResponseHandler.get("Retrieved customer with email: " + email, HttpStatus.OK, customerResDTO);
+            return okResponseHandler.getContent("Retrieved customer with email: " + email, HttpStatus.OK, customerResDTO);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -81,9 +80,8 @@ public class CustomerServiceImpl implements CustomerService {
 
             Page<Customer> customerPage = customerRepository.findAll(pageable);
             Page<CustomerResDTO> customerDTOPage = customerPage.map(customer -> modelMapper.map(customer, CustomerResDTO.class));
-            PaginationResponseHandler<CustomerResDTO> customers = new PaginationResponseHandler<>(customerDTOPage);
 
-            return okResponseHandler.get("Retrieved customers list", HttpStatus.OK, customers);
+            return okResponseHandler.getPaginated("Retrieved customers list", HttpStatus.OK, customerDTOPage);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }

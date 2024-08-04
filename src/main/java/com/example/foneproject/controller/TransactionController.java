@@ -23,6 +23,6 @@ public class TransactionController {
 
     @GetMapping("/get")
     public ResponseEntity<Map<String, Object>> getTransactionByAccount(@RequestParam("accId") int accId, @RequestParam(name = "page", defaultValue = "0") int page) {
-        return transactionService.getByAccount(page, accId);
+        return transactionService.getAllByAccount(page, accId);
     }
 }

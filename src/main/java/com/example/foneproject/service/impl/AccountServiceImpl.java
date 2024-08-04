@@ -7,7 +7,6 @@ import com.example.foneproject.entity.Customer;
 import com.example.foneproject.exception.*;
 import com.example.foneproject.handler.ErrorResponseHandler;
 import com.example.foneproject.handler.OkResponseHandler;
-import com.example.foneproject.handler.PaginationResponseHandler;
 import com.example.foneproject.repository.AccountRepository;
 import com.example.foneproject.repository.CustomerRepository;
 import com.example.foneproject.service.AccountService;
@@ -49,7 +48,7 @@ public class AccountServiceImpl implements AccountService {
             Account account = accountOptional.get();
             AccountResDTO accountResDTO = modelMapper.map(account, AccountResDTO.class);
 
-            return okResponseHandler.get("Retrieved account with ID: " + id, HttpStatus.OK, accountResDTO);
+            return okResponseHandler.getContent("Retrieved account with ID: " + id, HttpStatus.OK, accountResDTO);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -62,9 +61,8 @@ public class AccountServiceImpl implements AccountService {
 
             Page<Account> accountPage = accountRepository.findByEmailPageable(pageRequest, email);
             Page<AccountResDTO> accountDTOPage = accountPage.map(account -> modelMapper.map(account, AccountResDTO.class));
-            PaginationResponseHandler<AccountResDTO> accounts = new PaginationResponseHandler<>(accountDTOPage);
 
-            return okResponseHandler.get("Retrieved accounts associated with email: " + email, HttpStatus.OK, accounts);
+            return okResponseHandler.getPaginated("Retrieved accounts associated with email: " + email, HttpStatus.OK, accountDTOPage);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -77,9 +75,8 @@ public class AccountServiceImpl implements AccountService {
 
             Page<Account> accountPage = accountRepository.findAll(pageRequest);
             Page<AccountResDTO> accountDTOPage = accountPage.map(account -> modelMapper.map(account, AccountResDTO.class));
-            PaginationResponseHandler<AccountResDTO> accounts = new PaginationResponseHandler<>(accountDTOPage);
 
-            return okResponseHandler.get("Retrieved all accounts", HttpStatus.OK, accounts);
+            return okResponseHandler.getPaginated("Retrieved all accounts", HttpStatus.OK, accountDTOPage);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -100,22 +97,27 @@ public class AccountServiceImpl implements AccountService {
             int openingBalance = account.getBalance();
 
             String accType = account.getType();
-            if (!(accType.equalsIgnoreCase("saving") || accType.equals("checking"))) {
+            if (!(accType.equalsIgnoreCase("savings") || accType.equals("checking"))) {
                 throw new UnsupportedAccTypeException();
             }
 
-            if (accType.equals("saving")) {
+            if (accType.equals("savings")) {
                 account.setInterest(5.5f);
             } else {
                 account.setInterest(0.0f);
             }
 
-            List<Account> assoicatedEmailsList = accountRepository.findByCustomer_Email(registeredCustomer.getEmail());
-            if (assoicatedEmailsList.isEmpty()) {
+            List<Account> associatedEmailsList = accountRepository.findByCustomer_Email(email);
+            if (associatedEmailsList.isEmpty()) {
                 account.setBalance(initialDeposit + openingBalance);
                 accountRepository.save(account);
             } else {
                 account.setBalance(openingBalance);
+                for (Account acc : associatedEmailsList) {
+                    if (acc.getType().equals(accountReqDTO.getType())) {
+                        throw new DuplicateAccTypeException(accountReqDTO.getType());
+                    }
+                }
                 accountRepository.save(account);
             }
             return okResponseHandler.get("Account successfully opened", HttpStatus.CREATED);
