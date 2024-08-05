@@ -10,13 +10,15 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface AccountRepository extends JpaRepository<Account, Integer> {
-    boolean existsByCustomer_Email(String email);
-
     List<Account> findByCustomer_Email(String email);
 
     @Modifying
     @Query("update Account a set a.balance=(a.balance+?2) where a.id= ?1")
-    void depositAmount(int id, int amount);
+    void increaseFunds(int id, int amount);
+
+    @Modifying
+    @Query("update Account a set a.balance=(a.balance-?2) where a.id= ?1")
+    void decreaseFunds(int id, int amount);
 
     @Query("select a from Account a where a.customer.email= ?1")
     Page<Account> findByEmailPageable(Pageable pageable, String email);

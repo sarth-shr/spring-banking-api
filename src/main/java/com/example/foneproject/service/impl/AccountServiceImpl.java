@@ -86,12 +86,13 @@ public class AccountServiceImpl implements AccountService {
     public ResponseEntity<Map<String, Object>> open(AccountReqDTO accountReqDTO) {
         try {
             Account account = modelMapper.map(accountReqDTO, Account.class);
-
             String email = account.getCustomer().getEmail();
+
             Optional<Customer> customerOptional = customerRepository.findByEmail(email);
             if (customerOptional.isEmpty()) {
                 throw new ResourceNotFoundException(email);
             }
+
             Customer registeredCustomer = customerOptional.get();
             int initialDeposit = registeredCustomer.getInitialDeposit();
             int openingBalance = account.getBalance();
@@ -136,7 +137,7 @@ public class AccountServiceImpl implements AccountService {
             }
 
             Account account = accountOptional.get();
-            accountRepository.depositAmount(accId, amount);
+            accountRepository.increaseFunds(accId, amount);
             transactionService.saveDeposit(account, amount);
 
 //            emailUtils.sendMail(
@@ -152,6 +153,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<Map<String, Object>> transfer(int fromId, int toId, int amount) {
         try {
             if (fromId == toId) {
@@ -165,18 +167,15 @@ public class AccountServiceImpl implements AccountService {
             }
 
             Account fromAccount = fromAccountOptional.get();
-            int fromAccountOldBalance = fromAccount.getBalance();
+            Account toAccount = toAccountOptional.get();
 
+            int fromAccountOldBalance = fromAccount.getBalance();
             if (fromAccountOldBalance < amount) {
                 throw new InsufficientFundsException();
             }
-            fromAccount.setBalance(fromAccountOldBalance - amount);
-            accountRepository.save(fromAccount);
 
-            Account toAccount = toAccountOptional.get();
-            int toAccountOldBalance = toAccount.getBalance();
-            toAccount.setBalance(toAccountOldBalance + amount);
-            accountRepository.save(toAccount);
+            accountRepository.decreaseFunds(fromId, amount);
+            accountRepository.increaseFunds(toId, amount);
 
             transactionService.saveTransfer(fromAccount, toAccount, amount);
 

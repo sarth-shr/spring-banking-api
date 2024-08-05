@@ -55,11 +55,11 @@ public class TransactionServiceImpl implements TransactionService {
             Transaction transaction = Transaction.builder()
                     .type("TRANSFER")
                     .fromAccount(fromAccount)
-                    .fromAccOldBalance(fromAccount.getBalance() + amount)
-                    .fromAccNewBalance(fromAccount.getBalance())
+                    .fromAccOldBalance(fromAccount.getBalance())
+                    .fromAccNewBalance(fromAccount.getBalance() - amount)
                     .toAccount(toAccount)
-                    .toAccOldBalance(toAccount.getBalance() - amount)
-                    .toAccNewBalance(toAccount.getBalance())
+                    .toAccOldBalance(toAccount.getBalance())
+                    .toAccNewBalance(toAccount.getBalance() + amount)
                     .toAccount(toAccount)
                     .amount(amount)
                     .date(new Date())
@@ -117,7 +117,7 @@ public class TransactionServiceImpl implements TransactionService {
             Page<Transaction> transactionPage = transactionRepository.findByAccountPageable(pageRequest, accId);
             Page<TransactionResDTO> transactionDTOPage = transactionPage.map(transaction -> modelMapper.map(transaction, TransactionResDTO.class));
 
-            return okResponseHandler.getContent("Retrieved all transactions associated with account ID: " + accId, HttpStatus.OK, transactionDTOPage);
+            return okResponseHandler.getPaginated("Retrieved all transactions associated with account ID: " + accId, HttpStatus.OK, transactionDTOPage);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
