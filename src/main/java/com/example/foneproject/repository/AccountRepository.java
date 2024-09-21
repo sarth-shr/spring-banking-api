@@ -8,19 +8,22 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Integer> {
     List<Account> findByCustomer_Email(String email);
 
-    @Modifying
-    @Query("update Account a set a.balance=(a.balance+?2) where a.id= ?1")
-    void increaseFunds(int id, int amount);
+    Optional<Account> findByAccNumber(String accNumber);
 
     @Modifying
-    @Query("update Account a set a.balance=(a.balance-?2) where a.id= ?1")
-    void decreaseFunds(int id, int amount);
+    @Query("update Account a set a.balance=(a.balance+?2) where a.accNumber= ?1")
+    void increaseFunds(String accNumber, int amount);
+
+    @Modifying
+    @Query("update Account a set a.balance=(a.balance-?2) where a.accNumber= ?1")
+    void decreaseFunds(String accNumber, int amount);
 
     @Query("select a from Account a where a.customer.email= ?1")
-    Page<Account> findByEmailPageable(Pageable pageable, String email);
+    Page<Account> findByEmailPageable(String email, Pageable pageable);
 
 }

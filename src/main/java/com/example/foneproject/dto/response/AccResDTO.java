@@ -5,8 +5,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class AccountResDTO {
-    private int id;
+public class AccResDTO {
+    private String accountNumber;
     private String type;
     private int balance;
     private float interest;

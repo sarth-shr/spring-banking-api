@@ -1,10 +1,9 @@
 package com.example.foneproject.service;
 
 import com.example.foneproject.dto.request.JwtAuthReqDTO;
+import com.example.foneproject.util.ApiResponse;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Map;
-
 public interface JwtService {
-    ResponseEntity<Map<String, Object>> get(JwtAuthReqDTO jwtAuthReqDTO);
+    ResponseEntity<ApiResponse> get(JwtAuthReqDTO jwtAuthReqDTO);
 }

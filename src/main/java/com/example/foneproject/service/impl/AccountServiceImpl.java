@@ -1,7 +1,9 @@
 package com.example.foneproject.service.impl;
 
-import com.example.foneproject.dto.request.AccountReqDTO;
-import com.example.foneproject.dto.response.AccountResDTO;
+import com.example.foneproject.dto.request.AccDepositReqDTO;
+import com.example.foneproject.dto.request.AccReqDTO;
+import com.example.foneproject.dto.request.AccTransferReqDTO;
+import com.example.foneproject.dto.response.AccResDTO;
 import com.example.foneproject.entity.Account;
 import com.example.foneproject.entity.Customer;
 import com.example.foneproject.exception.*;
@@ -11,6 +13,7 @@ import com.example.foneproject.repository.AccountRepository;
 import com.example.foneproject.repository.CustomerRepository;
 import com.example.foneproject.service.AccountService;
 import com.example.foneproject.service.TransactionService;
+import com.example.foneproject.util.ApiResponse;
 import com.example.foneproject.util.EmailUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -23,8 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -38,29 +41,29 @@ public class AccountServiceImpl implements AccountService {
     private final ErrorResponseHandler errorResponseHandler;
 
     @Override
-    public ResponseEntity<Map<String, Object>> get(int id) {
+    public ResponseEntity<ApiResponse> get(String accNumber) {
         try {
-            Optional<Account> accountOptional = accountRepository.findById(id);
+            Optional<Account> accountOptional = accountRepository.findByAccNumber(accNumber);
             if (accountOptional.isEmpty()) {
-                throw new ResourceNotFoundException(id);
+                throw new ResourceNotFoundException(accNumber);
             }
 
             Account account = accountOptional.get();
-            AccountResDTO accountResDTO = modelMapper.map(account, AccountResDTO.class);
+            AccResDTO accResDTO = modelMapper.map(account, AccResDTO.class);
 
-            return okResponseHandler.getContent("Retrieved account with ID: " + id, HttpStatus.OK, accountResDTO);
+            return okResponseHandler.getContent("Retrieved A/C #" + accNumber, HttpStatus.OK, accResDTO);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> getAllByEmail(String email, int page) {
+    public ResponseEntity<ApiResponse> getAllByEmail(String email, int page) {
         try {
             Pageable pageRequest = PageRequest.of(page, 3);
 
-            Page<Account> accountPage = accountRepository.findByEmailPageable(pageRequest, email);
-            Page<AccountResDTO> accountDTOPage = accountPage.map(account -> modelMapper.map(account, AccountResDTO.class));
+            Page<Account> accountPage = accountRepository.findByEmailPageable(email, pageRequest);
+            Page<AccResDTO> accountDTOPage = accountPage.map(account -> modelMapper.map(account, AccResDTO.class));
 
             return okResponseHandler.getPaginated("Retrieved accounts associated with email: " + email, HttpStatus.OK, accountDTOPage);
         } catch (Exception e) {
@@ -69,12 +72,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> getAll(int page) {
+    public ResponseEntity<ApiResponse> getAll(int page) {
         try {
             Pageable pageRequest = PageRequest.of(page, 3);
 
             Page<Account> accountPage = accountRepository.findAll(pageRequest);
-            Page<AccountResDTO> accountDTOPage = accountPage.map(account -> modelMapper.map(account, AccountResDTO.class));
+            Page<AccResDTO> accountDTOPage = accountPage.map(account -> modelMapper.map(account, AccResDTO.class));
 
             return okResponseHandler.getPaginated("Retrieved all accounts", HttpStatus.OK, accountDTOPage);
         } catch (Exception e) {
@@ -83,14 +86,14 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> open(AccountReqDTO accountReqDTO) {
+    public ResponseEntity<ApiResponse> open(AccReqDTO accReqDTO) {
         try {
-            Account account = modelMapper.map(accountReqDTO, Account.class);
-            String email = account.getCustomer().getEmail();
+            Account account = modelMapper.map(accReqDTO, Account.class);
+            String customerEmail = account.getCustomer().getEmail();
 
-            Optional<Customer> customerOptional = customerRepository.findByEmail(email);
+            Optional<Customer> customerOptional = customerRepository.findByEmail(customerEmail);
             if (customerOptional.isEmpty()) {
-                throw new ResourceNotFoundException(email);
+                throw new ResourceNotFoundException(customerEmail);
             }
 
             Customer registeredCustomer = customerOptional.get();
@@ -98,7 +101,7 @@ public class AccountServiceImpl implements AccountService {
             int openingBalance = account.getBalance();
 
             String accType = account.getType();
-            if (!(accType.equalsIgnoreCase("savings") || accType.equals("checking"))) {
+            if (!(accType.equalsIgnoreCase("savings") || accType.equalsIgnoreCase("checking"))) {
                 throw new UnsupportedAccTypeException();
             }
 
@@ -107,20 +110,23 @@ public class AccountServiceImpl implements AccountService {
             } else {
                 account.setInterest(0.0f);
             }
+            account.setAccNumber(genAccountNumber());
+            account.setCustomer(registeredCustomer);
 
-            List<Account> associatedEmailsList = accountRepository.findByCustomer_Email(email);
+            List<Account> associatedEmailsList = accountRepository.findByCustomer_Email(registeredCustomer.getEmail());
             if (associatedEmailsList.isEmpty()) {
                 account.setBalance(initialDeposit + openingBalance);
                 accountRepository.save(account);
             } else {
                 account.setBalance(openingBalance);
                 for (Account acc : associatedEmailsList) {
-                    if (acc.getType().equals(accountReqDTO.getType())) {
-                        throw new DuplicateAccTypeException(accountReqDTO.getType());
+                    if (acc.getType().equals(accReqDTO.getType())) {
+                        throw new DuplicateAccTypeException(accReqDTO.getType());
                     }
                 }
                 accountRepository.save(account);
             }
+
             return okResponseHandler.get("Account successfully opened", HttpStatus.CREATED);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -129,15 +135,18 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> deposit(int accId, int amount) {
+    public ResponseEntity<ApiResponse> deposit(AccDepositReqDTO accDepositReqDTO) {
         try {
-            Optional<Account> accountOptional = accountRepository.findById(accId);
+            String accNumber = accDepositReqDTO.getAccNumber();
+            int amount = accDepositReqDTO.getAmount();
+
+            Optional<Account> accountOptional = accountRepository.findByAccNumber(accNumber);
             if (accountOptional.isEmpty()) {
-                throw new ResourceNotFoundException(accId);
+                throw new ResourceNotFoundException(accNumber);
             }
 
             Account account = accountOptional.get();
-            accountRepository.increaseFunds(accId, amount);
+            accountRepository.increaseFunds(accNumber, amount);
             transactionService.saveDeposit(account, amount);
 
 //            emailUtils.sendMail(
@@ -146,7 +155,7 @@ public class AccountServiceImpl implements AccountService {
 //                    "Amount of " + amount + " has been deposited into your account with ID: " + accId
 //            );
 
-            return okResponseHandler.get("Amount: " + amount + " deposited to account with ID: " + accId, HttpStatus.OK);
+            return okResponseHandler.get("Amount: " + amount + " deposited to A/C #" + accNumber, HttpStatus.OK);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -154,14 +163,18 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> transfer(int fromId, int toId, int amount) {
+    public ResponseEntity<ApiResponse> transfer(AccTransferReqDTO accTransferReqDTO) {
         try {
-            if (fromId == toId) {
+            String fromAccNumber = accTransferReqDTO.getFromAccNumber();
+            String toAccNumber = accTransferReqDTO.getToAccNumber();
+            int amount = accTransferReqDTO.getAmount();
+
+            if (fromAccNumber.equals(toAccNumber)) {
                 throw new SameTransferIdException();
             }
 
-            Optional<Account> fromAccountOptional = accountRepository.findById(fromId);
-            Optional<Account> toAccountOptional = accountRepository.findById(toId);
+            Optional<Account> fromAccountOptional = accountRepository.findByAccNumber(fromAccNumber);
+            Optional<Account> toAccountOptional = accountRepository.findByAccNumber(toAccNumber);
             if (fromAccountOptional.isEmpty() || toAccountOptional.isEmpty()) {
                 throw new InvalidTransferIdException();
             }
@@ -174,8 +187,8 @@ public class AccountServiceImpl implements AccountService {
                 throw new InsufficientFundsException();
             }
 
-            accountRepository.decreaseFunds(fromId, amount);
-            accountRepository.increaseFunds(toId, amount);
+            accountRepository.decreaseFunds(fromAccNumber, amount);
+            accountRepository.increaseFunds(toAccNumber, amount);
 
             transactionService.saveTransfer(fromAccount, toAccount, amount);
 
@@ -191,28 +204,36 @@ public class AccountServiceImpl implements AccountService {
 //                    "Amount of " + amount + " has been transferred into your account with ID: " + toId + " from account with ID: " + fromId
 //            );
 
-            return okResponseHandler.get("Amount: " + amount + " transferred from account with ID: " + fromId + " to account with ID: " + toId, HttpStatus.OK);
+            return okResponseHandler.get("Amount: " + amount + " transferred from A/C #" + fromAccNumber + " to A/C #" + toAccNumber, HttpStatus.OK);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> delete(int id) {
+    public ResponseEntity<ApiResponse> delete(String accNumber) {
         try {
-            Optional<Account> accountOptional = accountRepository.findById(id);
+            Optional<Account> accountOptional = accountRepository.findByAccNumber(accNumber);
             if (accountOptional.isEmpty()) {
-                throw new ResourceNotFoundException(id);
+                throw new ResourceNotFoundException(accNumber);
             }
 
             Account account = accountOptional.get();
             if (account.getBalance() > 0) {
-                throw new ActiveBalanceException(id, account.getBalance());
+                throw new ActiveBalanceException(accNumber, account.getBalance());
             }
-            accountRepository.deleteById(id);
-            return okResponseHandler.get("Account ID: " + id + " deleted successfully", HttpStatus.OK);
+            accountRepository.deleteById(account.getId());
+            return okResponseHandler.get("A/C #" + accNumber + " deleted successfully", HttpStatus.OK);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private String genAccountNumber() {
+        String accNumber;
+        do {
+            accNumber = UUID.randomUUID().toString().substring(0, 13).replaceAll("-", "").toUpperCase();
+        } while (accountRepository.findByAccNumber(accNumber).isPresent());
+        return accNumber;
     }
 }

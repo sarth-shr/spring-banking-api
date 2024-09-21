@@ -11,6 +11,6 @@ public class CustomerPasswordReqDTO {
 
     @NotBlank(message = "New Password cannot be empty")
     @Size(min = 8, message = "Minimum of 8 characters")
-    private String password;
+    private String updatedPassword;
 
 }

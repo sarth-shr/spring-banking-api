@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class AccountReqDTO {
+public class AccReqDTO {
     @NotBlank(message = "Account type cannot be empty")
     private String type;
 
@@ -17,6 +17,6 @@ public class AccountReqDTO {
 
     @Valid
     @NotNull(message = "Required field")
-    private AccountCustomerReqDTO customer;
+    private AccCustomerReqDTO customer;
 
 }

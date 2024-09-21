@@ -18,6 +18,9 @@ public class Account {
     @Column(name = "acc_id")
     private Integer id;
 
+    @Column(name = "acc_number", unique = true)
+    private String accNumber;
+
     @Column(name = "acc_type")
     private String type;
 
@@ -29,6 +32,6 @@ public class Account {
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "customer_email", foreignKey = @ForeignKey(name = "fk_customer_email"))
+    @JoinColumn(name = "customer_id", foreignKey = @ForeignKey(name = "fk_customer_email"))
     private Customer customer;
 }

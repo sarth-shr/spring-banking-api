@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
-public interface CustomerRepository extends JpaRepository<Customer, String> {
+public interface CustomerRepository extends JpaRepository<Customer, Integer> {
     boolean existsByEmail(String email);
 
     Optional<Customer> findByEmail(String email);
@@ -18,9 +18,9 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
 
     @Modifying
     @Query("update Customer c set c.email= ?2 where c.email= ?1")
-    void updateEmail(String currentEmail, String newEmail);
+    void updateEmail(String currentEmail, String updatedEmail);
 
     @Modifying
-    @Query("update Customer c set c.password= ?1 where c.email= ?2")
-    void updatePassword(String password, String email);
+    @Query("update Customer c set c.password= ?2 where c.email= ?1")
+    void updatePassword(String email, String updatedPassword);
 }

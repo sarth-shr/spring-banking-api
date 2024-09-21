@@ -4,6 +4,7 @@ import com.example.foneproject.dto.request.JwtAuthReqDTO;
 import com.example.foneproject.handler.ErrorResponseHandler;
 import com.example.foneproject.handler.OkResponseHandler;
 import com.example.foneproject.service.JwtService;
+import com.example.foneproject.util.ApiResponse;
 import com.example.foneproject.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,8 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-
 @Service
 @RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
@@ -25,7 +24,7 @@ public class JwtServiceImpl implements JwtService {
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public ResponseEntity<Map<String, Object>> get(JwtAuthReqDTO jwtAuthReqDTO) {
+    public ResponseEntity<ApiResponse> get(JwtAuthReqDTO jwtAuthReqDTO) {
         try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(jwtAuthReqDTO.getEmail(), jwtAuthReqDTO.getPassword()));
             if (authentication.isAuthenticated()) {

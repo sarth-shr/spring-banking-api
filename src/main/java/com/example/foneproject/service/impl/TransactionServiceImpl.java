@@ -8,6 +8,7 @@ import com.example.foneproject.handler.ErrorResponseHandler;
 import com.example.foneproject.handler.OkResponseHandler;
 import com.example.foneproject.repository.TransactionRepository;
 import com.example.foneproject.service.TransactionService;
+import com.example.foneproject.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -19,8 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -31,11 +31,11 @@ public class TransactionServiceImpl implements TransactionService {
     private final ErrorResponseHandler errorResponseHandler;
     private final TransactionRepository transactionRepository;
 
-    @Override
     public void saveDeposit(Account account, int amount) {
         try {
             Transaction transaction = Transaction.builder()
                     .type("DEPOSIT")
+                    .transactionNumber(generateTransactionNumber())
                     .toAccount(account)
                     .toAccOldBalance(account.getBalance())
                     .toAccNewBalance(account.getBalance() + amount)
@@ -54,6 +54,7 @@ public class TransactionServiceImpl implements TransactionService {
         try {
             Transaction transaction = Transaction.builder()
                     .type("TRANSFER")
+                    .transactionNumber(generateTransactionNumber())
                     .fromAccount(fromAccount)
                     .fromAccOldBalance(fromAccount.getBalance())
                     .fromAccNewBalance(fromAccount.getBalance() - amount)
@@ -75,7 +76,8 @@ public class TransactionServiceImpl implements TransactionService {
     public void saveInterest(Account account, int amount) {
         try {
             Transaction transaction = Transaction.builder()
-                    .type("INTEREST RECEIVED")
+                    .type("INTEREST CREDITED")
+                    .transactionNumber(generateTransactionNumber())
                     .toAccount(account)
                     .toAccOldBalance(account.getBalance() - amount)
                     .toAccNewBalance(account.getBalance())
@@ -90,7 +92,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> getAll(int page) {
+    public ResponseEntity<ApiResponse> getAll(int page) {
         try {
             Pageable pageable = PageRequest.of(page, 3);
 
@@ -105,21 +107,27 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> getAllByAccount(int page, int accId) {
+    public ResponseEntity<ApiResponse> getAllByAccount(String accNumber, int page) {
         try {
-            List<Transaction> transactionAccount = transactionRepository.findByAccountId(accId);
-            if (transactionAccount.isEmpty()) {
-                throw new ResourceNotFoundException(accId);
+            if (transactionRepository.findByFromAccount_AccNumberOrToAccount_AccNumber(accNumber, accNumber).isEmpty()) {
+                throw new ResourceNotFoundException(accNumber);
             }
-
             Pageable pageRequest = PageRequest.of(page, 3);
 
-            Page<Transaction> transactionPage = transactionRepository.findByAccountPageable(pageRequest, accId);
+            Page<Transaction> transactionPage = transactionRepository.findByFromAccount_AccNumberOrToAccount_AccNumber(accNumber, accNumber, pageRequest);
             Page<TransactionResDTO> transactionDTOPage = transactionPage.map(transaction -> modelMapper.map(transaction, TransactionResDTO.class));
 
-            return okResponseHandler.getPaginated("Retrieved all transactions associated with account ID: " + accId, HttpStatus.OK, transactionDTOPage);
+            return okResponseHandler.getPaginated("Retrieved all transactions associated with A/C #" + accNumber, HttpStatus.OK, transactionDTOPage);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private String generateTransactionNumber() {
+        String transactionNumber;
+        do {
+            transactionNumber = UUID.randomUUID().toString().substring(0, 13).replaceAll("-", "").toUpperCase();
+        } while (transactionRepository.findByTransactionNumber(transactionNumber).isPresent());
+        return transactionNumber;
     }
 }

@@ -1,9 +1,6 @@
 package com.example.foneproject.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,14 +11,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "customers")
 public class Customer {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "customer_id")
+    private int id;
+
     @Column(name = "customer_first_name")
     private String firstName;
 
     @Column(name = "customer_last_name")
     private String lastName;
 
-    @Id
-    @Column(name = "customer_email")
+    @Column(name = "customer_email", unique = true)
     private String email;
 
     @Column(name = "customer_password")

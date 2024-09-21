@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class AccountCustomerReqDTO {
-    @NotNull(message = "Please associate an existing user email with your account")
+public class AccCustomerReqDTO {
+    @NotNull(message = "Required Field")
     private String email;
 }

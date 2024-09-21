@@ -7,11 +7,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
-    @Query("select t from Transaction t where t.fromAccount.id=?1 or t.toAccount.id=?1")
-    List<Transaction> findByAccountId(int id);
+    List<Transaction> findByFromAccount_AccNumberOrToAccount_AccNumber(String fromAccNumber, String toAccNumber);
 
-    @Query("select t from Transaction t where t.fromAccount.id=?1 or t.toAccount.id=?1")
-    Page<Transaction> findByAccountPageable(Pageable pageable, int accId);
+    Page<Transaction> findByFromAccount_AccNumberOrToAccount_AccNumber(String fromAccNumber, String toAccNumber, Pageable pageable);
+
+    @Query("select t from Transaction t where t.fromAccount.accNumber=?1 or t.toAccount.accNumber=?1")
+    Page<Transaction> findByAccNumber(String accNumber, Pageable pageable);
+
+    Optional<Transaction> findByTransactionNumber(String transactionNumber);
 }

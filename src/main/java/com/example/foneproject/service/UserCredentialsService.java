@@ -2,22 +2,21 @@ package com.example.foneproject.service;
 
 import com.example.foneproject.dto.request.AuthoritiesReqDTO;
 import com.example.foneproject.entity.Customer;
+import com.example.foneproject.util.ApiResponse;
 import org.springframework.http.ResponseEntity;
-
-import java.util.Map;
 
 public interface UserCredentialsService {
     void loadAdmin();
 
     void save(Customer customer);
 
-    void updateEmail(String email, Customer customer);
+    void updateEmail(String currentEmail, String updatedEmail);
 
-    void updatePassword(String email, Customer customer);
+    void updatePassword(String email, String updatedPassword);
 
-    ResponseEntity<Map<String, Object>> disableUser(String email);
+    ResponseEntity<ApiResponse> disableUser(String email);
 
-    ResponseEntity<Map<String, Object>> enableUser(String email);
+    ResponseEntity<ApiResponse> enableUser(String email);
 
-    ResponseEntity<Map<String, Object>> assignRole(String email, AuthoritiesReqDTO authoritiesReqDTO);
+    ResponseEntity<ApiResponse> assignRole(String email, AuthoritiesReqDTO authoritiesReqDTO);
 }

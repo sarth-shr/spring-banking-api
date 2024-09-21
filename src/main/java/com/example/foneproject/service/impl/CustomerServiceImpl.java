@@ -14,6 +14,7 @@ import com.example.foneproject.handler.OkResponseHandler;
 import com.example.foneproject.repository.CustomerRepository;
 import com.example.foneproject.service.CustomerService;
 import com.example.foneproject.service.UserCredentialsService;
+import com.example.foneproject.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -25,7 +26,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -39,7 +39,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final UserCredentialsService userCredentialsService;
 
     @Override
-    public ResponseEntity<Map<String, Object>> save(CustomerReqDTO customerReqDTO) {
+    public ResponseEntity<ApiResponse> save(CustomerReqDTO customerReqDTO) {
         try {
             Customer customer = modelMapper.map(customerReqDTO, Customer.class);
             String email = customer.getEmail();
@@ -58,7 +58,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> get(String email) {
+    public ResponseEntity<ApiResponse> get(String email) {
         try {
             Optional<Customer> customerOptional = customerRepository.findByEmail(email);
             if (customerOptional.isEmpty()) {
@@ -74,7 +74,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public ResponseEntity<Map<String, Object>> getAll(int page) {
+    public ResponseEntity<ApiResponse> getAll(int page) {
         try {
             Pageable pageable = PageRequest.of(page, 3);
 
@@ -89,13 +89,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> updatePersonal(String email, CustomerInfoReqDTO customerInfoReqDTO) {
+    public ResponseEntity<ApiResponse> updatePersonal(String email, CustomerInfoReqDTO customerInfoReqDTO) {
         try {
             if (!customerRepository.existsByEmail(email)) {
                 throw new ResourceNotFoundException(email);
             }
-            Customer customer = modelMapper.map(customerInfoReqDTO, Customer.class);
-            customerRepository.updatePersonalDetails(customer.getFirstName(), customer.getLastName(), email);
+            String firstName = customerInfoReqDTO.getFirstName();
+            String lastName = customerInfoReqDTO.getLastName();
+            customerRepository.updatePersonalDetails(firstName, lastName, email);
 
             return okResponseHandler.get("Updated personal details of email: " + email, HttpStatus.OK);
         } catch (Exception e) {
@@ -105,7 +106,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> updateEmail(String email, CustomerEmailReqDTO customerEmailReqDTO) {
+    public ResponseEntity<ApiResponse> updateEmail(String email, CustomerEmailReqDTO customerEmailReqDTO) {
         try {
             Customer customer = modelMapper.map(customerEmailReqDTO, Customer.class);
             if (!customerRepository.existsByEmail(email)) {
@@ -116,7 +117,7 @@ public class CustomerServiceImpl implements CustomerService {
             }
             customerRepository.updateEmail(email, customer.getEmail());
 
-            userCredentialsService.updateEmail(email, customer);
+            userCredentialsService.updateEmail(email, customer.getEmail());
             return okResponseHandler.get("Email changed successfully", HttpStatus.OK);
         } catch (Exception e) {
             return errorResponseHandler.get(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -125,23 +126,23 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> updatePassword(String email, CustomerPasswordReqDTO customerPasswordReqDTO) {
+    public ResponseEntity<ApiResponse> updatePassword(String email, CustomerPasswordReqDTO customerPasswordReqDTO) {
         try {
             Optional<Customer> customerOptional = customerRepository.findByEmail(email);
             if (customerOptional.isEmpty()) {
                 throw new ResourceNotFoundException(email);
             }
 
-            Customer customer = modelMapper.map(customerPasswordReqDTO, Customer.class);
-
             String currentPassword = customerPasswordReqDTO.getCurrentPassword();
             String hashedPassword = customerOptional.get().getPassword();
+
             if (!passwordEncoder.matches(currentPassword, hashedPassword)) {
                 throw new InvalidCredentialsException();
             }
 
-            customerRepository.updatePassword(passwordEncoder.encode(customer.getPassword()), email);
-            userCredentialsService.updatePassword(email, customer);
+            String updatedPassword = customerPasswordReqDTO.getUpdatedPassword();
+            customerRepository.updatePassword(email, passwordEncoder.encode(updatedPassword));
+            userCredentialsService.updatePassword(email, updatedPassword);
 
             return okResponseHandler.get("Password changed successfully", HttpStatus.OK);
         } catch (Exception e) {

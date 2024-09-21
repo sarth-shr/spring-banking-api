@@ -20,6 +20,9 @@ public class Transaction {
     @Column(name = "transaction_id")
     private int id;
 
+    @Column(name = "transaction_number", unique = true)
+    private String transactionNumber;
+
     @Column(name = "transaction_date")
     private Date date;
 

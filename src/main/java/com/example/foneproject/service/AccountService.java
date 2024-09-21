@@ -1,22 +1,23 @@
 package com.example.foneproject.service;
 
-import com.example.foneproject.dto.request.AccountReqDTO;
+import com.example.foneproject.dto.request.AccDepositReqDTO;
+import com.example.foneproject.dto.request.AccReqDTO;
+import com.example.foneproject.dto.request.AccTransferReqDTO;
+import com.example.foneproject.util.ApiResponse;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Map;
-
 public interface AccountService {
-    ResponseEntity<Map<String, Object>> get(int id);
+    ResponseEntity<ApiResponse> get(String accNumber);
 
-    ResponseEntity<Map<String, Object>> getAllByEmail(String email, int page);
+    ResponseEntity<ApiResponse> getAllByEmail(String email, int page);
 
-    ResponseEntity<Map<String, Object>> getAll(int page);
+    ResponseEntity<ApiResponse> getAll(int page);
 
-    ResponseEntity<Map<String, Object>> open(AccountReqDTO accountReqDTO);
+    ResponseEntity<ApiResponse> open(AccReqDTO accReqDTO);
 
-    ResponseEntity<Map<String, Object>> deposit(int accId, int amount);
+    ResponseEntity<ApiResponse> deposit(AccDepositReqDTO accDepositReqDTO);
 
-    ResponseEntity<Map<String, Object>> transfer(int fromId, int toId, int amount);
+    ResponseEntity<ApiResponse> transfer(AccTransferReqDTO accTransferReqDTO);
 
-    ResponseEntity<Map<String, Object>> delete(int id);
+    ResponseEntity<ApiResponse> delete(String accNumber);
 }

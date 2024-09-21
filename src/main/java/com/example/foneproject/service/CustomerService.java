@@ -4,20 +4,20 @@ import com.example.foneproject.dto.request.CustomerEmailReqDTO;
 import com.example.foneproject.dto.request.CustomerInfoReqDTO;
 import com.example.foneproject.dto.request.CustomerPasswordReqDTO;
 import com.example.foneproject.dto.request.CustomerReqDTO;
+import com.example.foneproject.util.ApiResponse;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Map;
-
 public interface CustomerService {
-    ResponseEntity<Map<String, Object>> save(CustomerReqDTO customerReqDTO);
 
-    ResponseEntity<Map<String, Object>> get(String email);
+    ResponseEntity<ApiResponse> get(String email);
 
-    ResponseEntity<Map<String, Object>> getAll(int page);
+    ResponseEntity<ApiResponse> getAll(int page);
 
-    ResponseEntity<Map<String, Object>> updatePersonal(String email, CustomerInfoReqDTO customerInfoReqDTO);
+    ResponseEntity<ApiResponse> save(CustomerReqDTO customerReqDTO);
 
-    ResponseEntity<Map<String, Object>> updateEmail(String email, CustomerEmailReqDTO customerEmailReqDTO);
+    ResponseEntity<ApiResponse> updatePersonal(String email, CustomerInfoReqDTO customerInfoReqDTO);
 
-    ResponseEntity<Map<String, Object>> updatePassword(String email, CustomerPasswordReqDTO customerPasswordReqDTO);
+    ResponseEntity<ApiResponse> updateEmail(String email, CustomerEmailReqDTO customerEmailReqDTO);
+
+    ResponseEntity<ApiResponse> updatePassword(String email, CustomerPasswordReqDTO customerPasswordReqDTO);
 }

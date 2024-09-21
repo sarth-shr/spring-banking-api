@@ -10,14 +10,14 @@ import java.util.Date;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class TransactionResDTO {
-    private int id;
     private Date date;
     private String type;
+    private String transactionNumber;
     private int amount;
-    private int fromAccountId;
+    private String fromAccNumber;
     private int fromAccOldBalance;
     private int fromAccNewBalance;
-    private int toAccountId;
+    private String toAccNumber;
     private int toAccOldBalance;
     private int toAccNewBalance;
 }

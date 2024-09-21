@@ -8,6 +8,7 @@ import com.example.foneproject.handler.ErrorResponseHandler;
 import com.example.foneproject.handler.OkResponseHandler;
 import com.example.foneproject.repository.UserCredentialsRepository;
 import com.example.foneproject.service.UserCredentialsService;
+import com.example.foneproject.util.ApiResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -72,10 +71,9 @@ public class UserCredentialsServiceImpl implements UserCredentialsService {
 
     @Override
     @Transactional
-    public void updateEmail(String email, Customer customer) {
+    public void updateEmail(String currentEmail, String updatedEmail) {
         try {
-            UserCredentials userCredentials = modelMapper.map(customer, UserCredentials.class);
-            userCredentialsRepository.updateEmail(email, userCredentials.getEmail());
+            userCredentialsRepository.updateEmail(currentEmail, updatedEmail);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -83,10 +81,9 @@ public class UserCredentialsServiceImpl implements UserCredentialsService {
 
     @Override
     @Transactional
-    public void updatePassword(String email, Customer customer) {
+    public void updatePassword(String email, String updatedPassword) {
         try {
-            UserCredentials userCredentials = modelMapper.map(customer, UserCredentials.class);
-            userCredentialsRepository.updatePassword(email, passwordEncoder.encode(userCredentials.getPassword()));
+            userCredentialsRepository.updatePassword(email, passwordEncoder.encode(updatedPassword));
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -94,7 +91,7 @@ public class UserCredentialsServiceImpl implements UserCredentialsService {
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> disableUser(String email) {
+    public ResponseEntity<ApiResponse> disableUser(String email) {
         try {
             if (!userCredentialsRepository.existsByEmail(email)) {
                 throw new ResourceNotFoundException(email);
@@ -108,7 +105,7 @@ public class UserCredentialsServiceImpl implements UserCredentialsService {
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> enableUser(String email) {
+    public ResponseEntity<ApiResponse> enableUser(String email) {
         try {
             if (!userCredentialsRepository.existsByEmail(email)) {
                 throw new ResourceNotFoundException(email);
@@ -122,7 +119,7 @@ public class UserCredentialsServiceImpl implements UserCredentialsService {
 
     @Override
     @Transactional
-    public ResponseEntity<Map<String, Object>> assignRole(String email, AuthoritiesReqDTO authoritiesReqDTO) {
+    public ResponseEntity<ApiResponse> assignRole(String email, AuthoritiesReqDTO authoritiesReqDTO) {
         try {
             if (!userCredentialsRepository.existsByEmail(email)) {
                 throw new ResourceNotFoundException(email);
